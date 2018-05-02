@@ -9,6 +9,7 @@
 <link rel="import" href="../bower_components/app-layout/app-layout.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/maps-icons.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
@@ -24,7 +25,7 @@
             google-map {
                 position: relative;
                 display: block;
-                height: 350px;
+                height: 200px;
                 width: 100%;
             }
 
@@ -83,11 +84,11 @@
             <app-toolbar>
                 <div main-title>Магазины</div>
                 <paper-icon-button icon="search"></paper-icon-button>
-                <paper-icon-button icon="add"></paper-icon-button>
+                <paper-icon-button icon="add" on-click="openInsertShopDialog"></paper-icon-button>
             </app-toolbar>
         </app-header>
         <h1> Hello [[nameShop]]</h1>
-        <google-map fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
+        <!-- <google-map fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
             <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
         </google-map>
         <label  id="label2">Выберите иконку:</label>
@@ -101,7 +102,7 @@
         </paper-radio-group>
 
         <paper-input bind-value="{{nameShop}}" value="{{nameShop}}" placeholder="Наименование"></paper-input>
-        <paper-input id="input" bind-value="{{descriptionShop}}" value="{{descriptionShop}}" placeholder="Описание"></paper-input>
+        <paper-input id="input" bind-value="{{descriptionShop}}" value="{{descriptionShop}}" placeholder="Описание"></paper-input> -->
         <paper-input id="input" value="{{searchString}}" placeholder="Строка"></paper-input>
         <button on-click="filter">Filter</button>
         <button on-click="getAllShops">Get data</button>
@@ -111,12 +112,37 @@
                 <google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}"> </google-map-marker>
             </template>
         </google-map>
-        <paper-dialog id="dialog" modal>
+
+        <paper-dialog id="mapDialog" modal>
             <google-map fit-to-markers api-key="[[apiKey]]" latitude="[[latitude]]" longitude="[[item.longitude]]">
                 <google-map-marker latitude="[[latitude]]" longitude="[[item.longitude]]"> </google-map-marker>
             </google-map>
             <div class='buttons'>
                 <paper-button dialog-dismiss>Закрыть</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="insertShopDialog" modal>
+                <paper-dialog-scrollable>
+            <google-map fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
+                <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
+            </google-map>
+            <label  id="label2">Выберите иконку:</label>
+            <paper-radio-group selected="pyaterochka" aria-labelledby="label2">
+                <paper-radio-button name="pyaterochka"> <iron-image src="/images/pyaterochka.png"/></paper-radio-button>
+                <paper-radio-button name="perekrestok"> <iron-image src="/images/perekrestok.png"/></paper-radio-button>
+                <paper-radio-button name="lenta"><iron-image src="/images/lenta.png"/></paper-radio-button>
+                <paper-radio-button name="magnit"><iron-image src="/images/magnit.png"/></paper-radio-button>
+                <paper-radio-button name="karusel"><iron-image src="/images/karusel.png"/></paper-radio-button>
+                <paper-radio-button name="auchan"><iron-image src="/images/auchan.png"/> </paper-radio-button>
+            </paper-radio-group>
+    
+            <paper-input bind-value="{{nameShop}}" value="{{nameShop}}" placeholder="Наименование"></paper-input>
+            <paper-input id="input" bind-value="{{descriptionShop}}" value="{{descriptionShop}}" placeholder="Описание"></paper-input>
+        </paper-dialog-scrollable>
+            <div class='buttons'>
+                <paper-button dialog-dismiss>Отмена</paper-button>
+                <paper-button id="{{idShop}}" on-click="update">Сохранить</paper-button>
             </div>
         </paper-dialog>
 
@@ -130,14 +156,14 @@
                         <paper-icon-button slot="top" icon="maps:place"> {{item.latitude}}, {{item.longitude}}</paper-icon-button>
                     </div> -->
                     <div class="horizontal justified shop-location ">
-                        <paper-icon-button slot="top" icon="maps:place" on-click='dialogOpen'></paper-icon-button>
+                        <paper-icon-button slot="top" icon="maps:place" on-click='openMapDialog'></paper-icon-button>
                         <span class="shop-coordinates">[[item.latitude]], [[item.longitude]]</span>
                     </div>
 
                 </div>
                 <div class="card-actions">
                     <paper-button class="actions" on-click="delete">Удалить</paper-button>
-                    <paper-button class="actions" on-click="update">Изменить</paper-button>
+                    <paper-button class="actions" on-click="openUpdateShopDialog">Изменить</paper-button>
                 </div>
             </paper-card>
         </template>
@@ -161,6 +187,9 @@
                     value: function () {
                         return "AIzaSyDFsX7B97xHnLZWGD97X6ZGV8H9ZKBiJek";
                     }
+                },
+                idShop: {
+                    type:Number
                 },
                 nameShop: {
                     type: String
@@ -192,9 +221,6 @@
                 window.mozIndexedDB || window.msIndexedDB,
             IDBTransaction: window.IDBTransaction || window.webkitIDBTransaction,
             db: null,
-            dialogOpen: function () {
-                this.$.dialog.open();
-            },
             ready: function () {
                 this.initDb();
                 this.getAllShops();
@@ -306,9 +332,12 @@
                 }
             },
             update: function (e) {
-                var item = this.$.shopList.itemForElement(e.target);
+                // var item = this.$.shopList.itemForElement(e.target);
                 var description = this.descriptionShop;
                 var name = this.nameShop;
+                var longitude = this.longitude;
+                var latitude = this.latitude;
+                var id= this.idShop;
                 var db;
                 var self = this;
                 var request = this.indexedDB.open("BestPriceDatabase", 1);
@@ -316,11 +345,15 @@
                     db = request.result;
                     var transaction = db.transaction("shop", 'readwrite');
                     var objectStore = transaction.objectStore("shop");
-                    item.name = self.nameShop;
-                    item.description = self.descriptionShop;
-                    objectStore.put(item);
+                    
+                   /* item.name = self.nameShop;
+                    item.description = self.descriptionShop;*/
+                   // objectStore.put(item,);
+                   objectStore.put({ id:id, name:name,
+                        description: description, longitude:longitude, latitude:latitude});
                     self.getAllShops();
                 }
+                this.$.insertShopDialog.close();
             },
             filter: function () {
                 this.shops = [];
@@ -361,7 +394,20 @@
                     }
 
                 };
-            }
+            },
+            openMapDialog: function () {
+                this.$.mapDialog.open();
+            },
+            openInsertShopDialog: function () {
+                this.$.insertShopDialog.open();
+            },
+            openUpdateShopDialog: function (e) {
+                var item = this.$.shopList.itemForElement(e.target);
+                this.nameShop=item.name;
+                this.descriptionShop=item.description;
+                this.idShop=item.id;
+                this.$.insertShopDialog.open();
+            },
         })
     </script>
 </dom-module>
