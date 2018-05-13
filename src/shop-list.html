@@ -124,7 +124,7 @@
             </template>
         </google-map> -->
 
-        <paper-dialog id="mapDialog" modal>
+        <paper-dialog id="mapDialog">
             <paper-dialog-scrollable>
                 <google-map slot="markers" fit-to-markers api-key="[[apiKey]]" latitude="{{latitude}}" longitude="{{longitude}}">
                     <google-map-marker slot="markers" latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
@@ -138,7 +138,7 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="insertShopDialog" modal>
+        <paper-dialog id="insertShopDialog">
             <paper-dialog-scrollable>
                 <!-- <google-map slot="markers" fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
                 <google-map-marker  slot="markers" latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>

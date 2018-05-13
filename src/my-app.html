@@ -7,7 +7,6 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
@@ -20,20 +19,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-icons.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-shared-styles.html">
+<link rel='import' href='../bower_components/paper-icon-button/paper-icon-button.html' />
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="my-icons.html">
 
-<link rel="lazy-import" href="my-view1.html">
-<link rel="lazy-import" href="my-view2.html">
-<link rel="lazy-import" href="my-view3.html">
+<link rel="lazy-import" href="shop-list.html">
+<link rel="lazy-import" href="product-list.html">
 <link rel="lazy-import" href="my-view404.html">
 
 <dom-module id="my-app">
   <template>
     <style>
       :host {
-        --app-primary-color: #4285f4;
-        --app-secondary-color: black;
-
+        --app-primary-color: #ef6b01;
+        --app-hover-color: #fa9d10;
+        --app-secondary-color: #888;
         display: block;
       }
 
@@ -44,11 +50,108 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-header {
         color: #fff;
         background-color: var(--app-primary-color);
+        /*height: 30%;*/
       }
+
+      /* paper-toolbar {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      } */
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
+
+      .app-name-toolbar {
+        /*background-color: var(--app-hover-color);*/
+        /* background: url(/images/sidebar-background.png);
+        background-repeat: no-repeat;
+        background-position: center center;
+        object-fit: fill;
+        height: 200px; */
+        background: url(/images/sidebar-background.png);
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: cover;
+        height: 200px;
+
+      }
+
+      .app-name {
+        color: white;
+        font-size: 23px;
+        margin-left: 20px;
+      }
+
+      /* @media (max-width: 600px) {
+        app-toolbar {
+          height: 56px;
+          padding: 0 8px;
+        }
+      } */
+
+      paper-item.nav-item {
+        --paper-item-focused: {
+          color: var(--app-primary-color);
+          font-weight: bold;
+
+        }
+        ;
+        --paper-item-focused-before: {
+          opacity: 0;
+          font-weight: bold;
+
+        }
+        ;
+        --paper-item-selected: {
+          color: var(--app-primary-color);
+          font-weight: bold;
+        }
+      }
+      .drawer-list a.iron-selected paper-item.nav-item {
+        font-weight: bold
+      }
+      .drawer-list a.iron-selected paper-item.nav-item iron-icon{
+        color: var(--app-hover-color);
+      }
+      a:focus {
+        outline: none;
+      }
+
+      paper-item.nav-item iron-icon {
+        margin-right: 20px;
+      }
+
+      /* paper-item.nav-item {
+        --paper-item-focused: {
+          color: var(--app-primary-color);
+           font-weight: bold;
+        };
+        --paper-item-focused-before: {
+          opacity: 0;
+        };
+      }
+
+      paper-item.nav-item:hover {
+        color: var(--app-primary-color);
+
+      }
+
+      paper-item.nav-item:active {
+        color: var(--app-primary-color);
+      }
+
+      paper-item.nav-item iron-icon {
+        margin-right: 20px;
+        color: var(--app-secondary-color);
+      }
+
+      paper-item.nav-item:hover iron-icon {
+        color: var(--app-hover-color);
+      }
+      paper-item.nav-item:focus iron-icon {
+        color: var(--app-hover-color);
+      } */
 
       .drawer-list {
         margin: 0 20px;
@@ -56,38 +159,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .drawer-list a {
         display: block;
-        padding: 0 16px;
+        padding: 10px 0px;
         text-decoration: none;
         color: var(--app-secondary-color);
         line-height: 40px;
       }
 
       .drawer-list a.iron-selected {
-        color: black;
+        color: var(--app-primary-color);
         font-weight: bold;
+      }
+
+      paper-dropdown-menu.custom {
+        --paper-input-container-label: {
+          font-style: italic;
+          text-align: center;
+          font-weight: bold;
+        }
+        ;
+        --paper-input-container-input: {
+          color: white;
+          font-size: 20px;
+          padding-left: 0;
+          padding-bottom: 10px;
+          font-family: 'Roboto', 'Noto', sans-serif;
+          font-style: normal;
+          text-transform: uppercase;
+        }
+        ;
+        --paper-input-container-underline: {
+          display: none;
+        }
+        ;
       }
     </style>
 
-    <app-location
-        route="{{route}}"
-        url-space-regex="^[[rootPath]]">
+    <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
     </app-location>
 
-    <app-route
-        route="{{route}}"
-        pattern="[[rootPath]]:page"
-        data="{{routeData}}"
-        tail="{{subroute}}">
+    <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
     </app-route>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-        <app-toolbar>Menu</app-toolbar>
+        <app-toolbar class="app-name-toolbar">
+          <!-- <iron-image src="/images/logo.png"> </iron-image> -->
+          <div bottom-item class="app-name"> Best price </div>
+        </app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="[[rootPath]]view1">View One</a>
-          <a name="view2" href="[[rootPath]]view2">View Two</a>
-          <a name="view3" href="[[rootPath]]view3">View Three</a>
+          <a name="shop-list" class="paper-item-link" href="[[rootPath]]shop-list">
+            <paper-item class="nav-item">
+              <iron-icon icon="shopping-basket"></iron-icon>
+              Мои магазины
+            </paper-item>
+          </a>
+          <a name="product-list" class="paper-item-link" href="[[rootPath]]product-list">
+            <paper-item class="nav-item">
+              <iron-icon icon="view-list"></iron-icon>
+              Мои покупки
+            </paper-item>
+          </a>
         </iron-selector>
       </app-drawer>
 
@@ -95,23 +227,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-header-layout has-scrolling-region>
 
         <app-header slot="header" condenses reveals effects="waterfall">
+          <!-- <app-toolbar>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
+            <div main-title>Best price</div>
+          </app-toolbar> -->
+
+          <!-- <paper-toolbar class="middle">
+            <paper-icon-button slot="top" icon="menu" drawer-toggle></paper-icon-button>
+            <span class="title" slot="top">Мои магазины</span>
+            <paper-icon-button icon="add" slot="top">+</paper-icon-button>
+          </paper-toolbar> -->
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>My App</div>
+            <div main-title>Мои магазины</div>
+            <paper-icon-button icon="add"></paper-icon-button>
           </app-toolbar>
+
         </app-header>
 
-        <iron-pages
-            selected="[[page]]"
-            attr-for-selected="name"
-            fallback-selection="view404"
-            role="main">
-          <my-view1 name="view1"></my-view1>
-          <my-view2 name="view2"></my-view2>
-          <my-view3 name="view3"></my-view3>
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+          <shop-list name="shop-list"></shop-list>
+          <product-list name="product-list"></product-list>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
+
     </app-drawer-layout>
   </template>
 
@@ -121,7 +261,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer.setPassiveTouchGestures(true);
 
     class MyApp extends Polymer.Element {
-      static get is() { return 'my-app'; }
+      static get is() {
+        return 'my-app';
+      }
 
       static get properties() {
         return {
@@ -147,7 +289,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _routePageChanged(page) {
         // If no page was found in the route data, page will be an empty string.
         // Default to 'view1' in that case.
-        this.page = page || 'view1';
+        this.page = page || 'shop-list';
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
@@ -157,12 +299,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page) {
         // Load page import on demand. Show 404 page if fails
-        const resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+        const resolvedPageUrl = this.resolveUrl('shop-list.html');
         Polymer.importHref(
-            resolvedPageUrl,
-            null,
-            this._showPage404.bind(this),
-            true);
+          resolvedPageUrl,
+          null,
+          this._showPage404.bind(this),
+          true);
       }
 
       _showPage404() {
