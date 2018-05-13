@@ -14,18 +14,35 @@
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
+<link rel="import" href="my-icons.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-panel.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="shop-list">
     <template>
         <style>
+            :host {
+                --app-primary-color: #ef6b01;
+                --app-secondary-color: #888;
+            }
+
             google-map {
                 height: 200px;
             }
 
             #mapDialog {
                 width: 96%;
+            }
+
+            paper-fab {
+
+
+                /*position: fixed;
+                top: 100px;
+                right: 24px*/
             }
 
             /*#mapDialog {
@@ -37,7 +54,12 @@
             }*/
 
             app-toolbar {
-                background: rgb(51, 245, 252);
+                color: #fff;
+                background-color: var(--app-primary-color);
+            }
+
+            .clear {
+                clear: both;
             }
 
             .with-margin {
@@ -59,14 +81,20 @@
             }
 
             .shop-name {
+                float: left;
                 padding-left: 1%;
                 @apply --paper-font-headline;
             }
 
             .shop-description {
                 padding-left: 3%;
-                color: var(--paper-grey-600);
+                color: var(--app-secondary-color);
                 margin: 10px 0;
+            }
+
+            .update-fab {
+                background-color: var(--app-primary-color);
+                float: right;
             }
 
             .shop-icon {
@@ -85,19 +113,26 @@
 
             .actions {
                 float: right;
+                color: var(--app-secondary-color);
+                margin-bottom: 10px;
+            }
+
+            .clear {
+                clear: both;
             }
         </style>
-        <app-header reveals>
+        <!-- <app-header reveals>
             <app-toolbar>
-                <div main-title>Магазины</div>
-                <paper-icon-button icon="search"></paper-icon-button>
+               
+                <div main-title>Мои магазины</div>
                 <paper-icon-button icon="add" on-click="openInsertShopDialog"></paper-icon-button>
             </app-toolbar>
-        </app-header>
-        <h1> Hello [[nameShop]]</h1>
-        <google-map fit-to-markers api-key="AIzaSyDFsX7B97xHnLZWGD97X6ZGV8H9ZKBiJek" latitude="53.195538" longitude="50.101783">
-                <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
-            </google-map>
+        </app-header> -->
+
+
+        <paper-search-panel placeholder="Поиск..." hide-filter-button="true" search="{{search}}" count="{{count}}" items="[[shops]]"
+            loading="[[loading]]" on-change-request-params="loadData">
+        </paper-search-panel>
         <!-- <google-map fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
             <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
         </google-map>
@@ -129,9 +164,6 @@
                 <google-map slot="markers" fit-to-markers api-key="[[apiKey]]" latitude="{{latitude}}" longitude="{{longitude}}">
                     <google-map-marker slot="markers" latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
                 </google-map>
-                <!-- <google-map  slot="markers" fit-to-markers api-key="[[apiKey]]" latitude="[[latitude]]" longitude="[[item.longitude]]">
-                <google-map-marker  slot="markers" latitude="[[latitude]]" longitude="[[item.longitude]]"> </google-map-marker>
-            </google-map> -->
             </paper-dialog-scrollable>
             <div class='buttons'>
                 <paper-button dialog-dismiss>Закрыть</paper-button>
@@ -140,14 +172,12 @@
 
         <paper-dialog id="insertShopDialog">
             <paper-dialog-scrollable>
-                <!-- <google-map slot="markers" fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
-                <google-map-marker  slot="markers" latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
-            </google-map> -->
-                <google-map fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
+                <google-map zoom="12" fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
                     <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
                 </google-map>
-                <label id="label2">Выберите иконку:</label>
-                <paper-radio-group selected="{{iconShop}}" aria-labelledby="label2">
+                <p>Выберите иконку:</p>
+                <paper-radio-group selected="{{iconShop}}">
+                    <!-- <div class="clear"> -->
                     <paper-radio-button name="pyaterochka">
                         <iron-image src="/images/pyaterochka.png" />
                     </paper-radio-button>
@@ -159,12 +189,29 @@
                     </paper-radio-button>
                     <paper-radio-button name="magnit">
                         <iron-image src="/images/magnit.png" />
+                        <!-- </div>
+                    <div class="clear"> -->
                     </paper-radio-button>
-                    <paper-radio-button name="karusel">
+                    <paper-radio-button name="karusel" class="clear">
                         <iron-image src="/images/karusel.png" />
                     </paper-radio-button>
                     <paper-radio-button name="auchan">
                         <iron-image src="/images/auchan.png" /> </paper-radio-button>
+                    <paper-radio-button name="cosmetic">
+                        <iron-image src="/images/cosmetic.png" /> </paper-radio-button>
+                    <paper-radio-button name="sportmaster">
+                        <iron-image src="/images/sportmaster.png" /> </paper-radio-button>
+                    <!-- </div>
+                    <div class="clear"> -->
+                    <!-- <paper-radio-button name="kfc" >
+                            <iron-image src="/images/kfc.png" /> </paper-radio-button>
+                        <paper-radio-button name="mac">
+                            <iron-image src="/images/mac.png" /> </paper-radio-button>
+                        <paper-radio-button name="burgerking">
+                            <iron-image src="/images/burgerking.png" /> </paper-radio-button>
+                        <paper-radio-button name="other">
+                            <iron-image src="/images/other.png" /> </paper-radio-button> -->
+                    <!-- </div> -->
                 </paper-radio-group>
 
                 <paper-input bind-value="{{nameShop}}" value="{{nameShop}}" placeholder="Наименование"></paper-input>
@@ -181,19 +228,33 @@
                 <div class="card-content">
                     <div class="shop-name">
                         <iron-icon class="shop-icon" src="/images/[[item.icon]].png"></iron-icon> {{item.name}}</div>
-                    <div class="shop-description">{{item.description}}</div>
+                    <paper-fab class="update-fab" mini icon="create" on-click="openUpdateShopDialog"></paper-fab>
+
+                    <div class="shop-description clear">{{item.description}}</div>
+
                     <!-- <div>
                         <paper-icon-button slot="top" icon="maps:place"> {{item.latitude}}, {{item.longitude}}</paper-icon-button>
                     </div> -->
-                    <div class="horizontal justified shop-location-img ">
+                    <!-- <div class="horizontal justified shop-location-img ">
                         <paper-icon-button slot="top" icon="maps:place" on-click='openMapDialog'></paper-icon-button>
                         <span class="shop-coordinates">[[item.latitude]], [[item.longitude]]</span>
+                    </div> -->
+                    <div>
+                        <!-- <google-map  zoom="14" fit-to-markers api-key="[[apiKey]]" latitude="{{item.latitude}}" longitude="{{item.longitude}}">
+                            <google-map-marker  latitude="{{item.latitude}}" longitude="{{item.longitude}}"></google-map-marker>
+                        </google-map>       
+                                                      -->
+                        <google-map zoom="14" fit-to-markers api-key="[[apiKey]]" latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false">
+                            <google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}" > </google-map-marker>
+                        </google-map>
                     </div>
 
                 </div>
                 <div class="card-actions">
-                    <paper-button class="actions" on-click="delete">Удалить</paper-button>
-                    <paper-button class="actions" on-click="openUpdateShopDialog">Изменить</paper-button>
+                    <!-- <paper-fab class="actions" mini icon="delete" on-click="delete"></paper-fab> -->
+                    <paper-icon-button class="actions" icon="delete" on-click="delete">Удалить </paper-icon-button>
+                    <!-- <paper-button class="actions" on-click="delete">Удалить</paper-button>
+                    <paper-button class="actions" on-click="openUpdateShopDialog">Изменить</paper-button> -->
                 </div>
             </paper-card>
         </template>
@@ -259,6 +320,10 @@
             IDBTransaction: window.IDBTransaction || window.webkitIDBTransaction,
             db: null,
             ready: function () {
+                var self = this;
+                document.addEventListener('shop-list', function (e) {
+                    self.openInsertShopDialog();
+                }, false);
                 this.initDb();
                 this.getAllShops();
             },
@@ -448,6 +513,11 @@
             },
             openInsertShopDialog: function () {
                 this.action = "addShop";
+                this.nameShop = "";
+                this.descriptionShop = "";
+                this.longitude =50.101783;
+                this.latitude = 53.195538;
+                this.iconShop = "pyaterochka";
                 this.$.insertShopDialog.open();
             },
             openUpdateShopDialog: function (e) {

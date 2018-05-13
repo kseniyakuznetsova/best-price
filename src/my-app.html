@@ -108,14 +108,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           font-weight: bold;
         }
       }
+
       .drawer-list a.iron-selected paper-item.nav-item {
         font-weight: bold
       }
-      .drawer-list a.iron-selected paper-item.nav-item iron-icon{
-        color: var(--app-hover-color);
-      }
+
       a:focus {
         outline: none;
+        border: none;
+        font-weight: bold;
       }
 
       paper-item.nav-item iron-icon {
@@ -239,8 +240,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-toolbar> -->
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>Мои магазины</div>
-            <paper-icon-button icon="add"></paper-icon-button>
+            <div main-title>{{_computeTitle(page)}}</div>
+            <paper-icon-button icon="add" on-click="_sendAction"></paper-icon-button>
           </app-toolbar>
 
         </app-header>
@@ -309,6 +310,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _showPage404() {
         this.page = 'view404';
+      }
+
+      _computeTitle(page) {
+        let name;
+        switch (page) {
+          case 'shop-list':
+            name = 'Мои магазины';
+            break;
+          case 'product-list':
+            name = 'Список продуктов';
+            break;
+          case 'purchase-list':
+            name = 'Мои покупки';
+            break;
+          default:
+            name = 'Best price';
+            break;
+        }
+        return name;
+      }
+      _sendAction() {
+        var event = new CustomEvent(this.page);
+        document.dispatchEvent(event);
       }
     }
 
