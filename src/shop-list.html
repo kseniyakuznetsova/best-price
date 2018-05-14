@@ -120,6 +120,14 @@
             .clear {
                 clear: both;
             }
+
+            paper-input.custom {
+                margin-bottom: 14px;
+                --primary-text-color: black;
+                --paper-input-container-color: black;
+                --paper-input-container-focus-color: var(--app-primary-color);
+                --paper-input-container-invalid-color: red;
+            }
         </style>
         <!-- <app-header reveals>
             <app-toolbar>
@@ -214,8 +222,12 @@
                     <!-- </div> -->
                 </paper-radio-group>
 
-                <paper-input bind-value="{{nameShop}}" value="{{nameShop}}" placeholder="Наименование"></paper-input>
-                <paper-input id="input" bind-value="{{descriptionShop}}" value="{{descriptionShop}}" placeholder="Описание"></paper-input>
+                <!-- <paper-input bind-value="{{nameShop}}" value="{{nameShop}}" placeholder="Наименование"></paper-input> -->
+                <!-- <paper-input id="input" bind-value="{{descriptionShop}}" value="{{descriptionShop}}" placeholder="Описание"></paper-input> -->
+                <paper-input class="custom" id="inputName" required label="Наименование" char-counter maxlength="30" error-message="Заполните поле"
+                    value="{{nameShop}}"></paper-input>
+                <paper-input class="custom" id="inputDescription" required label="Описание" char-counter maxlength="40" error-message="Заполните поле"
+                    value="{{descriptionShop}}"></paper-input>
             </paper-dialog-scrollable>
             <div class='buttons'>
                 <paper-button dialog-dismiss>Отмена</paper-button>
@@ -245,7 +257,7 @@
                         </google-map>       
                                                       -->
                         <google-map zoom="14" fit-to-markers api-key="[[apiKey]]" latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false">
-                            <google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}" > </google-map-marker>
+                            <google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}"> </google-map-marker>
                         </google-map>
                     </div>
 
@@ -512,10 +524,12 @@
                 this.$.mapDialog.open();
             },
             openInsertShopDialog: function () {
+                this.$.inputDescription.invalid = false;
+                this.$.inputName.invalid = false;
                 this.action = "addShop";
                 this.nameShop = "";
                 this.descriptionShop = "";
-                this.longitude =50.101783;
+                this.longitude = 50.101783;
                 this.latitude = 53.195538;
                 this.iconShop = "pyaterochka";
                 this.$.insertShopDialog.open();
@@ -532,10 +546,12 @@
                 this.$.insertShopDialog.open();
             },
             doAction: function () {
-                if (this.action == "update") {
-                    this.update();
-                } else {
-                    this.addShop();
+                if (this.$.inputDescription.validate() & this.$.inputName.validate()) {
+                    if (this.action == "update") {
+                        this.update();
+                    } else {
+                        this.addShop();
+                    }
                 }
             }
         })
