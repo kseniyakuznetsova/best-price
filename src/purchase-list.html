@@ -1,0 +1,361 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel='import' href='../bower_components/paper-listbox/paper-listbox.html' />
+<link rel='import' href='../bower_components/paper-item/paper-item.html' />
+<link rel='import' href='../bower_components/paper-icon-button/paper-icon-button.html' />
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+
+
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+
+<link rel="import" href="shared-styles.html">
+
+<link rel="lazy-import" href="product-list.html">
+
+<dom-module id="purchase-list">
+    <template>
+        <style>
+            :host {
+                --app-primary-color: #ef6b01;
+                --app-hover-color: #fa9d10;
+                --app-button-color: #fef200;
+                --app-secondary-color: #888;
+            }
+
+
+
+            .with-margin {
+                --paper-card: {
+                    /* width: 90%; */
+                    margin: 1% 1%;
+                    padding: 5px;
+                    width: 47%;
+                }
+            }
+
+            .shop-image {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 50%;
+                height: 100%;
+                /* background: url('../images/pyaterochka.png'); */
+                background-size: cover;
+            }
+            .shop-icon {
+                float: left;
+                /* padding-left: 1%; */
+              
+            }
+
+            .shop-name {
+                padding-left: 2%;
+                color: black;
+                @apply --paper-font-headline;
+                margin: 10px 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .shop-description {
+                padding-left: 2%;
+                color: var(--app-secondary-color);
+                margin: 10px 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                /* width: 100%; */
+            }
+
+            .clear {
+                clear: both;
+            }
+
+            .update-fab {
+                background-color: var(--app-primary-color);
+                float: right;
+                margin-left: 10px;
+                /* height: 48px;
+                width: 48px;
+                color: var(--app-primary-color);
+                padding-right: 0; */
+            }
+
+            .shop-icon {
+                width: 48px;
+                height: 48px;
+            }
+
+            .shop-location-img {
+                padding-left: 1%;
+                color: var(--paper-grey-600);
+            }
+
+            .shop-coordinates {
+                color: black;
+            }
+
+            .actions {
+                float: right;
+                /* color: var(--app-secondary-color); */
+                color: var(--app-primary-color);
+                font-size: 14px;
+                margin-bottom: 5px;
+                /* margin-bottom: 10px; */
+            }
+
+            div.purchase-information {
+                margin-left: 2%;
+            }
+            .sum-icon{
+                margin-left: 10px;
+            }
+
+            iron-icon {
+                color: var(--app-primary-color);
+            }
+
+            @media (max-width: 600px) {
+                .with-margin {
+                    --paper-card: {
+                        margin: 1% 5%;
+                        width: 90%;
+                    }
+                }
+            }
+        </style>
+
+        <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
+        </app-location>
+
+        <template is="dom-repeat" items="{{purchases}}" id="purchaseList" sort="sort">
+            <paper-card class="with-margin">
+                <div class="card-content">
+                        <paper-fab class="update-fab" mini icon="open-in-new" on-click="view"></paper-fab>
+                        <!-- <paper-icon-button class="update-fab" icon="info-outline" on-click="view"></paper-icon-button> -->
+                    <div class="shop-icon">
+                        <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon>
+                    </div>
+                    
+                    <div class="shop-name"> {{item.name}}                       
+                    </div>
+                   
+                    <div class="shop-description clear">{{item.description}}</div>
+                    <div class="purchase-information clear">
+                        <iron-icon icon="editor:insert-invitation"></iron-icon>
+                        {{item.date}}
+                        <iron-icon class="sum-icon" icon="credit-card"></iron-icon>
+                        {{item.sum}}&#8194;руб.
+                    </div>
+                    <!-- 
+                    <div class="purchase-information clear">
+                       
+                    </div> -->
+                </div>
+                <div class="card-actions">
+                    <!-- <paper-icon-button class="actions" icon="info-outline" on-click="view">Подробнее</paper-icon-button> -->
+                    <!-- <paper-icon-button class="actions" icon="delete" on-click="deletePurchase">Удалить </paper-icon-button> -->
+                    <paper-button class="actions" icon="delete" on-click="deletePurchase">Удалить </paper-button>
+                </div>
+            </paper-card>
+        </template>
+    </template>
+    <script>
+        Polymer({
+            is: "purchase-list",
+            properties: {
+                purchases: {
+                    type: Array,
+                    value: []
+                },
+                rootPath: {
+                    type: String
+                }
+            },
+            indexedDB: window.indexedDB || window.webkitIndexedDB ||
+                window.mozIndexedDB || window.msIndexedDB,
+            IDBTransaction: window.IDBTransaction || window.webkitIDBTransaction,
+            db: null,
+            ready: function () {
+                var self = this;
+                document.addEventListener('purchase-list', function (e) {
+                    self.insertNewPurchase();
+                }, false);
+                document.addEventListener('build', function (e) {
+                    self.getAllPurchases();
+                }, false);
+                this.initDb();
+                this.getAllPurchases();
+            },
+            initDb: function () {
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    this.db = request.result;
+                };
+                request.onerror = function (evt) {
+                    console.log("IndexedDB error: " + evt.target.errorCode);
+                };
+                request.onupgradeneeded = function (evt) {
+                    var objectStore = evt.currentTarget.result.createObjectStore("shop", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("name", "name");
+                    objectStore.createIndex("coordinates", ["longitude", "latitude"]);
+
+                    var objectStore = evt.currentTarget.result.createObjectStore("productList", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("date_shop", ["date", "idShop"]);
+                    objectStore.createIndex("productListIndexShop", "idShop");
+
+                    var objectStore = evt.currentTarget.result.createObjectStore("product", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("productIndex", ["date", "idShop", "nameProduct"]);
+                    objectStore.createIndex("productIndexName", ["date", "nameProduct"]);
+                    objectStore.createIndex("productIndexPurchase", "idPurchase");
+                    objectStore.createIndex("productIndexShop", "idShop");
+                };
+            },
+            getAllPurchases: function () {
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                var self = this;
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("productList", 'readwrite');
+                    var objectStore = transaction.objectStore("productList");
+                    var cursors = objectStore.openCursor();
+                    self.purchases = [];
+                    cursors.onsuccess = function (event) {
+                        if (event.target.result) {
+                            var purchase = event.target.result.value;
+                            var products = event.target.result.value["products"];
+                            var sum = 0;
+                            var i;
+                            for (i = 0; i < products.length; i++) {
+                                sum += Number(products[i].priceProduct) * Number(products[i].countProduct);
+                            }
+                            var shopId = event.target.result.value["idShop"];
+                            self.getShop(shopId, event.target.result.value["id"],
+                                (new Date(event.target.result.value["date"])).toLocaleDateString(),
+                                Math.round(sum * 100) / 100);
+                            event.target.result['continue']();
+                        }
+                    };
+                };
+            },
+            getShop: function (shopId, id, date, sum) {
+                var shopId = shopId;
+                var self = this;
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readwrite');
+                    var objectStore = transaction.objectStore("shop");
+                    var index = objectStore.get(shopId);
+                    index.onsuccess = function (evt) {
+                        self.push('purchases', {
+                            id: id,
+                            name: index.result.name,
+                            description: index.result.description,
+                            date: date,
+                            sum: sum,
+                            image: index.result.image
+                        });
+                    };
+                };
+            },
+            showAddProductDialog: function () {
+                this.$.addProductDialog.open();
+            },
+            addProduct: function () {
+                this.push('products', {
+                    nameProduct: this.nameProduct,
+                    countProduct: this.countProduct,
+                    priceProduct: this.priceProduct
+                });
+                this.nameProduct = "";
+                this.countProduct = "";
+                this.priceProduct = "";
+
+                this.$.addProductDialog.close();
+            },
+            deletePurchase: function (e) {
+                var item = this.$.purchaseList.itemForElement(e.target);
+                var db;
+                var self = this;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("productList", 'readwrite');
+                    var objectStore = transaction.objectStore("productList");
+                    var objectStoreRequest = objectStore.delete(item.id);
+
+                    objectStoreRequest.onsuccess = function (evt) {
+                        var transactionProduct = db.transaction("product", 'readwrite');
+                        var objectStoreProduct = transactionProduct.objectStore("product");
+                        var index = objectStoreProduct.index("productIndexPurchase");
+                        var cursors = index.openCursor(IDBKeyRange.only(item.id));
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                objectStoreProduct.delete(event.target.result.value["id"]);
+                                event.target.result['continue']();
+                            }
+                        };
+                        self.getAllPurchases();
+                    };
+
+                }
+            },
+            save: function (e) {
+                var date = this.date;
+                var db;
+                var self = this;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("productList", 'readwrite');
+                    var objectStore = transaction.objectStore("productList");
+                    objectStore.add({
+                        date: date,
+                        idShop: self.idShop,
+                        products: self.products
+                    });
+                }
+            },
+            insertNewPurchase: function () {
+                var event = new CustomEvent('insertNewPurchase');
+                document.dispatchEvent(event);
+                this.set('route.path', this.rootPath + 'product-list');
+            },
+            view: function (e) {
+                var item = this.$.purchaseList.itemForElement(e.target);
+                this.set('route.path', this.rootPath + 'product-list');
+                var event = new CustomEvent('viewPurchase', {
+                    detail: {
+                        id: item.id
+                    }
+                });
+                document.dispatchEvent(event);
+            },
+            sort: function (a, b) {
+                if (a.date === b.date) return 0;
+                return a.date > b.date ? -1 : 1;
+            }
+        })
+    </script>
+</dom-module>

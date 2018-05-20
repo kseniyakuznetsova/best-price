@@ -35,26 +35,9 @@
                 min-height: 200px;
             }
 
-            #mapDialog {
-                width: 96%;
+            h3 {
+                color: var(--app-primary-color);
             }
-
-            paper-fab {
-
-
-                /*position: fixed;
-                top: 100px;
-                right: 24px*/
-            }
-
-            /*#mapDialog {
-                width: 96%;
-            }
-            #mapDialog google-map{
-                height: 400px;
-                width: 80%;
-            }*/
-
             app-toolbar {
                 color: #fff;
                 background-color: var(--app-primary-color);
@@ -91,7 +74,7 @@
             }
 
             .shop-description {
-                padding-left: 3%;
+                padding-left: 2%;
                 color: var(--app-secondary-color);
                 margin: 10px 0;
             }
@@ -111,18 +94,13 @@
                 color: var(--paper-grey-600);
             }
 
-            .shop-coordinates {
-                color: black;
-            }
-
             .actions {
                 float: right;
-                color: var(--app-secondary-color);
-                margin-bottom: 10px;
-            }
-
-            .clear {
-                clear: both;
+                /* color: var(--app-secondary-color); */
+                color: var(--app-primary-color);
+                font-size: 14px;
+                margin-bottom: 5px;
+                /* margin-bottom: 10px; */
             }
 
             paper-input.custom {
@@ -157,6 +135,15 @@
                 margin: 0;
             }
 
+            paper-dialog#confirmDialog {
+                position: fixed;
+                top: 50%;
+                left: 40%;
+                right: 30%;
+                padding: 0;
+                margin: 0;
+            }
+
             @media (max-width: 600px) {
                 .with-margin {
                     --paper-card: {
@@ -173,6 +160,10 @@
                     right: 0;
                     padding: 0;
                     margin: 0;
+                }
+                paper-dialog#confirmDialog {
+                    width: 60%;
+                    left: 20%;
                 }
             }
 
@@ -242,10 +233,22 @@
                 padding: 0 10px;
                 color: var(--app-secondary-color);
             }
+
+            div#not-found {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                color: var(--app-secondary-color);
+                /* margin-top: -50px; */
+                margin-left: -100px;
+                width: 200px;
+                height: 100px;
+            }
         </style>
         <paper-input id="search" value="{{searchString}}" placeholder="Поиск..." on-keydown="keyPressed">
             <iron-icon icon="search" slot="prefix"></iron-icon>
         </paper-input>
+
 
         <paper-dialog id="insertShopDialog">
 
@@ -304,7 +307,7 @@
                     value="{{nameShop}}"></paper-input>
                 <paper-input class="custom " id="inputDescription" required label="Описание" char-counter maxlength="40" error-message="Заполните поле"
                     value="{{descriptionShop}}"></paper-input>
-                <google-map zoom="12" fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783">
+                <google-map zoom="12" fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783" draggable="true">
                     <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
                 </google-map>
 
@@ -320,6 +323,20 @@
             </div> -->
         </paper-dialog>
 
+        <paper-dialog id="confirmDialog">
+            <h3>Удаление магазина</h3>
+            <p>Вы действительно хотите удалить выбранный магазин? Будут удалены покупки, совершенные в этом магазине. </p>
+            <div class="buttons">
+                <paper-button on-click="closeConfirmDialog">Отмена</paper-button>
+                <paper-button on-click="delete">Удалить</paper-button>
+            </div>
+        </paper-dialog>
+
+        <div id="not-found" hidden$="[[!isListEmpty]]"> Результатов не найдено </div>
+
+        <!-- <template is="dom-if" if="{{shops==null}}">
+            <div id="not-found"> Результатов не найдено </div>
+        </template> -->
         <template is="dom-repeat" items="{{shops}}" id="shopList">
             <paper-card class="with-margin">
                 <div class="card-content">
@@ -336,7 +353,8 @@
 
                 </div>
                 <div class="card-actions">
-                    <paper-icon-button class="actions" icon="delete" on-click="delete">Удалить </paper-icon-button>
+                    <!-- <paper-icon-button class="actions" icon="delete" on-click="openConfirmDialog">Удалить </paper-icon-button> -->
+                    <paper-button class="actions" icon="delete" on-click="openConfirmDialog">Удалить </paper-button>
                 </div>
             </paper-card>
         </template>
@@ -385,6 +403,10 @@
                 },
                 action: {
                     type: String
+                },
+                isListEmpty: {
+                    type: Boolean,
+                    value: false
                 }
             },
             indexedDB: window.indexedDB || window.webkitIndexedDB ||
@@ -497,7 +519,7 @@
                 };
             },
             delete: function (e) {
-                var item = this.$.shopList.itemForElement(e.target);
+                // var item = this.$.shopList.itemForElement(e.target);
                 var db;
                 var self = this;
                 var request = this.indexedDB.open("BestPriceDatabase", 1);
@@ -505,35 +527,37 @@
                     db = request.result;
                     var transaction = db.transaction("shop", 'readwrite');
                     var objectStore = transaction.objectStore("shop");
-                    var objectStoreRequest = objectStore.delete(item.id);
+                    // var objectStoreRequest = objectStore.delete(item.id);
+                    var objectStoreRequest = objectStore.delete(self.idShop);
 
-                    self.getAllShops();
-                    // objectStoreRequest.onsuccess = function (evt) {
-                    //     var transactionProduct = db.transaction("product", 'readwrite');
-                    //     var objectStoreProduct = transactionProduct.objectStore("product");
-                    //     var index = objectStoreProduct.index("productIndexShop");
-                    //     var cursors = index.openCursor(IDBKeyRange.only(item.id));
-                    //     cursors.onsuccess = function (event) {
-                    //         if (event.target.result) {
-                    //             objectStoreProduct.delete(event.target.result.value["id"]);
-                    //             event.target.result['continue']();
-                    //         }
-                    //     };
 
-                    //     var transactionProduct = db.transaction("productList", 'readwrite');
-                    //     var objectStoreProductList = transactionProduct.objectStore("productList");
-                    //     var index = objectStoreProductList.index("productListIndexShop");
-                    //     var cursors = index.openCursor(IDBKeyRange.only(item.id));
-                    //     cursors.onsuccess = function (event) {
-                    //         if (event.target.result) {
-                    //             objectStoreProductList.delete(event.target.result.value["id"]);
-                    //             event.target.result['continue']();
-                    //         }
-                    //     };
-                    //     document.dispatchEvent(new CustomEvent('updateShopList'));
-                    //     self.getAllShops();
+                    objectStoreRequest.onsuccess = function (evt) {
+                        var transactionProduct = db.transaction("product", 'readwrite');
+                        var objectStoreProduct = transactionProduct.objectStore("product");
+                        var index = objectStoreProduct.index("productIndexShop");
+                        var cursors = index.openCursor(IDBKeyRange.only(item.id));
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                objectStoreProduct.delete(event.target.result.value["id"]);
+                                event.target.result['continue']();
+                            }
+                        };
 
-                    // };
+                        var transactionProduct = db.transaction("productList", 'readwrite');
+                        var objectStoreProductList = transactionProduct.objectStore("productList");
+                        var index = objectStoreProductList.index("productListIndexShop");
+                        var cursors = index.openCursor(IDBKeyRange.only(item.id));
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                objectStoreProductList.delete(event.target.result.value["id"]);
+                                event.target.result['continue']();
+                            }
+                        };
+                        document.dispatchEvent(new CustomEvent('updateShopList'));
+                        self.getAllShops();
+                        self.searchString = "";
+                        self.closeConfirmDialog();
+                    };
                 }
             },
             update: function (e) {
@@ -567,7 +591,7 @@
                     var transaction = db.transaction("shop", 'readonly');
                     var objectStore = transaction.objectStore("shop");
                     var index = objectStore.index("name");
-                    if (self.searchString.trim()=="") {
+                    if (self.searchString.trim() == "") {
                         var cursors = objectStore.openCursor();
                         cursors.onsuccess = function (event) {
                             if (event.target.result) {
@@ -582,8 +606,10 @@
                                 event.target.result['continue']();
                             }
                         };
+                        self.isListEmpty = false;
                     } else {
-                        var cursors = index.openCursor(IDBKeyRange.bound(self.searchString.trim(), self.searchString.trim() +
+                        var cursors = index.openCursor(IDBKeyRange.bound(self.searchString.trim(), self
+                            .searchString.trim() +
                             '\uffff', true, true));
                         cursors.onsuccess = function (event) {
                             if (event.target.result) {
@@ -596,6 +622,9 @@
                                     image: event.target.result.value["image"]
                                 });
                                 event.target.result['continue']();
+                                self.isListEmpty = false;
+                            } else {
+                                self.isListEmpty = true;
                             }
                         };
                     }
@@ -611,9 +640,8 @@
                 this.longitude = 50.101783;
                 this.latitude = 53.195538;
                 this.selectedImage = "/images/other.png";
-                this.async(function () {
-                    this.$.insertShopDialog.open();
-                });
+                this.searchString = "";
+                this.$.insertShopDialog.open();
             },
             openUpdateShopDialog: function (e) {
                 this.action = "update";
@@ -624,9 +652,8 @@
                 this.latitude = item.latitude;
                 this.selectedImage = item.image;
                 this.idShop = item.id;
-                this.async(function () {
-                    this.$.insertShopDialog.open();
-                });
+                this.searchString = "";
+                this.$.insertShopDialog.open();
             },
             doAction: function () {
                 if (this.$.inputDescription.validate() & this.$.inputName.validate()) {
@@ -643,10 +670,15 @@
                 //     key = localStorage.key(i);
                 //     this.push('images', localStorage.getItem(key));
                 // }
-                this.async(function () {
-                    this.$.imageDialog.open();
-                });
+                this.$.imageDialog.open();
 
+            },
+            openConfirmDialog: function (evt) {
+                this.idShop = this.$.shopList.itemForElement(evt.target).id;
+                this.$.confirmDialog.open();
+            },
+            closeConfirmDialog: function () {
+                this.$.confirmDialog.close();
             },
             closeInsertShopDialog: function () {
                 this.$.insertShopDialog.close();
@@ -656,14 +688,8 @@
                 this.$.imageDialog.close();
             },
             keyPressed: function (evt) {
-                if(this.searchString!="")
+                if ((this.searchString == "" && !(evt.which == 8 || evt.keyCode == 8)) || this.searchString.trim() != "")
                     this.filter();
-                // if (evt.which == 13 || evt.keyCode == 13) {
-                //     this.filter();
-                // }
-                // else{
-
-                // }
             }
         })
     </script>
