@@ -68,15 +68,22 @@
             }
 
             .shop-name {
-                float: left;
-                padding-left: 1%;
-                @apply --paper-font-headline;
-            }
-
-            .shop-description {
                 padding-left: 2%;
+                color: black;
+                @apply --paper-font-headline;
+                margin: 10px 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .shop-description {
+                padding-left: 1%;
                 color: var(--app-secondary-color);
                 margin: 10px 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                /* width: 100%; */
             }
 
             .update-fab {
@@ -87,6 +94,7 @@
             .shop-icon {
                 width: 48px;
                 height: 48px;
+                float:left;
             }
 
             .shop-location-img {
@@ -340,10 +348,17 @@
         <template is="dom-repeat" items="{{shops}}" id="shopList">
             <paper-card class="with-margin">
                 <div class="card-content">
-                    <div class="shop-name">
-                        <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon> {{item.name}}</div>
+                    <!-- <div class="shop-name">
+                        <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon> {{item.name}}</div> -->
                     <paper-fab class="update-fab" mini icon="create" on-click="openUpdateShopDialog"></paper-fab>
 
+                    <div class="shop-icon">
+                        <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon>
+                    </div>
+                    
+                    <div class="shop-name"> {{item.name}}                       
+                    </div>
+                   
                     <div class="shop-description clear">{{item.description}}</div>
                     <div>
                         <google-map zoom="14" fit-to-markers api-key="[[apiKey]]" latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false">

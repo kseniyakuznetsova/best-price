@@ -24,7 +24,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-shared-styles.html">
 <link rel='import' href='../bower_components/paper-icon-button/paper-icon-button.html' />
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -117,7 +116,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       a:focus {
         outline: none;
-        border: none;
+        /* border: none; */
         font-weight: bold;
       }
 
@@ -155,6 +154,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       paper-item.nav-item:focus iron-icon {
         color: var(--app-hover-color);
       } */
+
+      .divider {
+        border-top: 1px solid #e5e5e5;
+        margin: 9px 0;
+      }
 
       .drawer-list {
         margin: 0 20px;
@@ -194,6 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: none;
         }
         ;
+
       }
     </style>
 
@@ -213,14 +218,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="shop-list" class="paper-item-link" href="[[rootPath]]shop-list">
             <paper-item class="nav-item">
-              <iron-icon icon="maps:store-mall-directory"></iron-icon>
+              <iron-icon icon="store"></iron-icon>
               Мои магазины
             </paper-item>
           </a>
           <a name="purchase-list" class="paper-item-link" href="[[rootPath]]purchase-list">
             <paper-item class="nav-item">
-              <iron-icon icon="shopping-basket"></iron-icon>
+              <iron-icon icon="shopping-cart"></iron-icon>
               Мои покупки
+            </paper-item>
+          </a>
+          <a name="product-list" class="paper-item-link divider" href="[[rootPath]]product-list">
+            <paper-item class="nav-item">
+              <iron-icon icon="add-shopping-cart"></iron-icon>
+              Новая покупка
             </paper-item>
           </a>
         </iron-selector>
