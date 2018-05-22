@@ -52,7 +52,7 @@
 
         <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
         </app-location>
-        <vaadin-date-picker label="Дата покупки" value={{date}}>
+        <vaadin-date-picker language="ru" label="Дата покупки" value={{date}}>
         </vaadin-date-picker>
         <!--<paper-input value="{{nameShop}}" placeholder="Наименование"></paper-input>
         <paper-input value="{{descriptionShop}}" placeholder="Описание"></paper-input>
@@ -87,7 +87,7 @@
                     <div>
                         <span>{{item.priceProduct}} руб</span>
                     </div>
-                    <image-input id="imageProduct" default-image="https://dummyimage.com/128x128/000000/fff.png&amp;text=image-file"></image-input>
+                    <image-input id="imageProduct" default-image="{{item.imageUrl}}"></image-input>
                     <paper-icon-button icon='delete' class='flex-1' style='color: gray' on-click='deleteProduct'>
                     </paper-icon-button>
                 </paper-item>
@@ -164,8 +164,7 @@
         </paper-toast>
 
         <button on-click="save">Сохранить</button>
-        <button on-click="back">Вернуться</button>
-        <iron-ajax id="requestRepos" url="https://10.60.9.252:8443/api/{{data}}" handle-as="json" on-response="handleResponse"></iron-ajax>
+        <iron-ajax id="requestRepos" url="http://10.60.10.4:8080/api/{{data}}" handle-as="json" on-response="handleResponse"></iron-ajax>
 
     </template>
     <script>
@@ -256,7 +255,7 @@
                     self.getProducts(e.detail.id);
                 }, false);
 
-                document.addEventListener('insertNewPurchase', function (e) {
+                document.addEventListener('addNewPurchase', function (e) {
                     self.products = [];
                 }, false);
 
@@ -284,6 +283,7 @@
                             // Put the received blob into IndexedDB
 
                             self.products[self.selectedItem].value = blob;
+                            self.products[self.selectedItem].imageUrl = file;
                         }
                     }, false);
                     // Send XHR
@@ -419,7 +419,7 @@
                 } else {
                     this.toastMessage = "Отсутствует соединение с сетью";
                     this.$.toastError.open();
-                }                
+                }
             },
             addProduct: function () {
                 var nameProduct = this.nameProduct.toUpperCase();
@@ -437,7 +437,8 @@
                     // weightProduct: weightProduct,
                     countProduct: countProduct,
                     priceProduct: priceProduct,
-                    value: null
+                    value: null,
+                    imageUrl: "https://dummyimage.com/128x128/000000/fff.png&amp;text=image-file"
                 });
 
                 this.$.addProductDialog.close();
@@ -478,7 +479,8 @@
                                     idShop: idShop,
                                     nameProduct: self.products[j].nameProduct,
                                     priceProduct: self.products[j].priceProduct,
-                                    value: self.products[j].value
+                                    value: self.products[j].value,
+                                    imageUrl: self.products[j].imageUrl,
                                 });
                             }
 
@@ -515,21 +517,12 @@
                         }
                         objectStore.put(purchase);
 
-                        transaction = db.transaction("product", 'readwrite');
-                        objectStore = transaction.objectStore("product");
-                        var j;
-                        for (j = 0; j < self.products.length; j++) {
-                            objectStore.add({
-                                date: date,
-                                idPurchase: self.idPurchase,
-                                idShop: idShop,
-                                nameProduct: self.products[j].nameProduct,
-                                priceProduct: self.products[j].priceProduct,
-                                value: self.products[j].value
-                            });
-                        }
-
                         self.deleteProducts();
+
+
+
+
+
                     }
                 }
             },
@@ -551,16 +544,15 @@
                 }
             },
             sendRequest: function () {
-                this.data= this.$.qrData.value;
+                this.data = this.$.qrData.value;
                 this.$.qrScanDialog.close();
                 if (window.navigator.onLine) {
                     this.$.requestRepos.generateRequest();
                 } else {
                     this.toastMessage = "Отсутствует соединение с сетью";
                     this.$.toastError.open();
-                } 
+                }
                 this.$.qrData.value = "";
-                
             },
             qrDialogDismiss: function () {
                 this.$.qrData.value = "";
@@ -569,11 +561,6 @@
             closeToastAndOpenDialog: function () {
                 this.$.toast.toggle();
                 this.$.cheaperProductsDialog.open();
-            },
-            back: function (e) {
-                var event = new CustomEvent('build');
-                document.dispatchEvent(event);
-                this.set('route.path', this.rootPath + 'purchase-list');
             },
             findPurchase: function (product, cheaperProduct) {
                 var self = this;
@@ -640,18 +627,29 @@
 
                     index.onsuccess = function (evt) {
                         self.products = index.result.products;
+                        var j;
+                        for (j = 0; j < self.products.length; j++) {
+                            var imgFile = self.products[j].value;
+                            // console.log("Got elephant!" + imgFile);
+                            var URL = window.URL || window.webkitURL;
+                            var imgURL = URL.createObjectURL(imgFile);
+                            self.products[j].imageUrl = imgURL;
+                        }
+
+
                         self.idShop = index.result.idShop;
-                        var curr_date = index.result.date;
-                        var curr_month = index.result.date.getMonth() + 1;
+                        var curr_date = new Date(index.result.date);
+                        var curr_month = curr_date.getMonth() + 1;
                         if (curr_month < 10) curr_month = "0" + curr_month;
-                        if (curr_date < 10) curr_date = "0" + curr_date;
-                        var curr_year = index.result.date.getFullYear();
+                        var curr_day = curr_date.getDate();
+                        if (curr_day < 10) curr_day = "0" + curr_day;
+                        var curr_year = curr_date.getFullYear();
                         var dateStr = curr_year.toString() + "-" + curr_month.toString() + "-" +
-                            curr_date.toString();
+                            curr_day.toString();
                         self.date = dateStr;
                         var i = 0;
-                        while (shop[i].id != self.idShop) i++;
-                        self.$.shopMenu.selected = i;
+                        while (self.shops[i].id != self.idShop) i++;
+                        self.$.shopMenu.selected = i + 1;
                     };
                 };
             },
@@ -670,6 +668,21 @@
                             objectStoreProduct.delete(event.target.result.value["id"]);
                             event.target.result['continue']();
                         }
+
+                        var transaction = db.transaction("product", 'readwrite');
+                        var objectStore = transaction.objectStore("product");
+                        var j;
+                        for (j = 0; j < self.products.length; j++) {
+                            objectStore.add({
+                                date: self.date,
+                                idPurchase: self.idPurchase,
+                                idShop: idShop,
+                                nameProduct: self.products[j].nameProduct,
+                                priceProduct: self.products[j].priceProduct,
+                                value: self.products[j].value
+                            });
+                        }
+
                     };
                 }
             }
