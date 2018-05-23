@@ -38,6 +38,7 @@
             h3 {
                 color: var(--app-primary-color);
             }
+
             app-toolbar {
                 color: #fff;
                 background-color: var(--app-primary-color);
@@ -76,6 +77,7 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+
             .shop-description {
                 padding-left: 1%;
                 color: var(--app-secondary-color);
@@ -94,7 +96,7 @@
             .shop-icon {
                 width: 48px;
                 height: 48px;
-                float:left;
+                float: left;
             }
 
             .shop-location-img {
@@ -114,7 +116,7 @@
             paper-input.custom {
                 margin-bottom: 14px;
                 --primary-text-color: black;
-                --paper-input-container-color: black;
+                --paper-input-container-color: var(--app-secondary-color);
                 --paper-input-container-focus-color: var(--app-primary-color);
                 --paper-input-container-invalid-color: red;
             }
@@ -355,10 +357,10 @@
                     <div class="shop-icon">
                         <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon>
                     </div>
-                    
-                    <div class="shop-name"> {{item.name}}                       
+
+                    <div class="shop-name"> {{item.name}}
                     </div>
-                   
+
                     <div class="shop-description clear">{{item.description}}</div>
                     <div>
                         <google-map zoom="14" fit-to-markers api-key="[[apiKey]]" latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false">
@@ -550,7 +552,7 @@
                         var transactionProduct = db.transaction("product", 'readwrite');
                         var objectStoreProduct = transactionProduct.objectStore("product");
                         var index = objectStoreProduct.index("productIndexShop");
-                        var cursors = index.openCursor(IDBKeyRange.only(item.id));
+                        var cursors = index.openCursor(IDBKeyRange.only(self.idShop));
                         cursors.onsuccess = function (event) {
                             if (event.target.result) {
                                 objectStoreProduct.delete(event.target.result.value["id"]);
@@ -561,7 +563,7 @@
                         var transactionProduct = db.transaction("productList", 'readwrite');
                         var objectStoreProductList = transactionProduct.objectStore("productList");
                         var index = objectStoreProductList.index("productListIndexShop");
-                        var cursors = index.openCursor(IDBKeyRange.only(item.id));
+                        var cursors = index.openCursor(IDBKeyRange.only(self.idShop));
                         cursors.onsuccess = function (event) {
                             if (event.target.result) {
                                 objectStoreProductList.delete(event.target.result.value["id"]);
@@ -671,7 +673,20 @@
                 this.$.insertShopDialog.open();
             },
             doAction: function () {
-                if (this.$.inputDescription.validate() & this.$.inputName.validate()) {
+                let valid = true;
+                if (this.nameShop.trim() == "") {
+                    this.$.inputName.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputName.invalid = false;
+                }
+                if (this.descriptionShop.trim() == "") {
+                    this.$.inputDescription.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputDescription.invalid = false;
+                }
+                if (valid) {
                     if (this.action == "update") {
                         this.update();
                     } else {
@@ -703,7 +718,8 @@
                 this.$.imageDialog.close();
             },
             keyPressed: function (evt) {
-                if ((this.searchString == "" && !(evt.which == 8 || evt.keyCode == 8)) || this.searchString.trim() != "")
+                if ((this.searchString == "" && !(evt.which == 8 || evt.keyCode == 8)) || this.searchString
+                    .trim() != "")
                     this.filter();
             }
         })
