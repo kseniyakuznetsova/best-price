@@ -254,7 +254,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>{{_computeTitle(page)}}</div>
-            <paper-icon-button icon="add" on-click="_sendAction"></paper-icon-button>
+            <paper-icon-button id="insertButton" icon="add" on-click="_sendAction"></paper-icon-button>
           </app-toolbar>
 
         </app-header>
@@ -306,7 +306,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Default to 'view1' in that case.
         this.page = page || 'shop-list';
         var event = new CustomEvent("get-all-list");
-        document.dispatchEvent(event);        
+        document.dispatchEvent(event);
+        if (this.page === "product-list") {
+          var event = new CustomEvent("clearProducts");
+          document.dispatchEvent(event);
+        }
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
@@ -332,12 +336,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         switch (page) {
           case 'shop-list':
             name = 'Мои магазины';
+            // this.$.insertButton.style.visibility = "visible";
+            this.$.insertButton.icon = "add";
             break;
           case 'purchase-list':
             name = 'Мои покупки';
+            this.$.insertButton.icon = "add";
             break;
           case 'product-list':
             name = 'Список продуктов';
+            this.$.insertButton.icon = "save";
             break;
           default:
             name = 'Best price';

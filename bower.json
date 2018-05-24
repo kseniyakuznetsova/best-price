@@ -35,7 +35,9 @@
     "paper-radio-group": "PolymerElements/paper-radio-group#^2.2.0",
     "paper-tooltip": "PolymerElements/paper-tooltip#^2.1.1",
     "paper-radio-button": "PolymerElements/paper-radio-button#^2.1.0",
-    "paper-number-input": "Zecat/paper-number-input#^1.1.0"
+    "paper-number-input": "Zecat/paper-number-input#^1.1.0",
+    "vaadin-icons": "vaadin/vaadin-icons#^4.1.4",
+    "vaadin-themes": "vaadin/vaadin-themes#^0.3.0"
   },
   "resolutions": {
     "polymer": "^2.0",
