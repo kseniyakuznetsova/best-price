@@ -35,7 +35,7 @@
 <dom-module id="product-list">
     <template>
         <style>
-            :host {
+             :host {
                 --app-primary-color: #ef6b01;
                 --app-hover-color: #fa9d10;
                 --app-button-color: #fef200;
@@ -117,7 +117,7 @@
 
             paper-button {
                 color: var(--app-primary-color);
-
+                font-size: 14px;
             }
 
             paper-button.custom {
@@ -133,6 +133,10 @@
             paper-button.custom:hover {
                 background-color: var(--app-primary-color);
                 color: white;
+            }
+
+            paper-button.custom[disabled] {
+                background-color: #cecece;
             }
 
             paper-button.qr-button {
@@ -153,7 +157,7 @@
                 float: right;
                 margin-right: 5%;
                 margin-top: 1%;
-                
+
                 background-color: var(--app-hover-color);
             }
 
@@ -262,6 +266,10 @@
 
         <!-- <paper-button class="custom save-button" on-click="save" raised>
                 <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button> -->
+
+                
+        <paper-button class="custom save-button" id="saveProducts" on-click="save" raised>
+            <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button>
 
         <vaadin-date-picker language="ru" label="Дата покупки" value={{date}}>
         </vaadin-date-picker>
@@ -465,17 +473,21 @@
                 this.date = dateStr;
                 this.initDb();
                 this.getAllShops();
+                this.$.saveProducts.disabled = true;
+                this.idPurchase = null;
 
                 document.addEventListener('product-list', function (e) {
-                    self.save();
+                    self.save();                    
                 }, false);
 
                 document.addEventListener('viewPurchase', function (e) {
                     self.getProducts(e.detail.id);
+                    self.$.saveProducts.disabled = false;
                 }, false);
 
                 document.addEventListener('clearProducts', function (e) {
                     self.products = [];
+                    self.$.saveProducts.disabled = true;
                 }, false);
 
                 document.addEventListener('updateShopList', function (e) {
@@ -685,6 +697,7 @@
                     this.nameProduct = "";
                     this.countProduct = "";
                     this.priceProduct = "";
+                    this.$.saveProducts.disabled = false;
 
                     this.$.addProductDialog.close();
                 }
@@ -694,6 +707,8 @@
                 var item = e.model.item;
                 var index = this.products.indexOf(item);
                 this.splice('products', index, 1);
+                if (this.products.length < 1)
+                    this.$.saveProducts.disabled = true;
             },
             save: function (e) {
 
@@ -746,6 +761,7 @@
 
 
                             };
+                            self.$.saveProducts.disabled = true;                            
                         }
                     };
                 } else {
@@ -764,7 +780,7 @@
                         objectStore.put(purchase);
 
                         self.deleteProducts();
-
+                        self.$.saveProducts.disabled = true;
 
 
 
@@ -871,15 +887,6 @@
 
                     index.onsuccess = function (evt) {
                         self.products = index.result.products;
-                        var j;
-                        for (j = 0; j < self.products.length; j++) {
-                            var imgFile = self.products[j].value;
-                            // console.log("Got elephant!" + imgFile);
-                            var URL = window.URL || window.webkitURL;
-                            var imgURL = URL.createObjectURL(imgFile);
-                            self.products[j].imageUrl = imgURL;
-                        }
-
 
                         self.idShop = index.result.idShop;
                         var curr_date = new Date(index.result.date);
@@ -895,6 +902,19 @@
                         var i = 0;
                         while (self.shops[i].id != self.idShop) i++;
                         self.$.shopMenu.selected = i + 1;
+
+
+                        var j;
+                        for (j = 0; j < self.products.length; j++) {
+                            var imgFile = self.products[j].value;
+                            // console.log("Got elephant!" + imgFile);
+                            var URL = window.URL || window.webkitURL;
+                            var imgURL = URL.createObjectURL(imgFile);
+                            self.products[j].imageUrl = imgURL;
+                        }
+
+
+                        
                     };
                 };
             },

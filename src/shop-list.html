@@ -594,6 +594,7 @@
                         image: self.$.imageShop.src
                     });
                     self.getAllShops();
+                    document.dispatchEvent(new CustomEvent('updateShopList'));
                 }
                 this.$.insertShopDialog.close();
             },

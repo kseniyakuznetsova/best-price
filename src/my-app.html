@@ -228,10 +228,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               Мои покупки
             </paper-item>
           </a>
-          <a name="product-list" class="paper-item-link divider" href="[[rootPath]]product-list">
+          <a id="productList" name="product-list" class="paper-item-link divider" href="[[rootPath]]product-list">
             <paper-item class="nav-item">
               <iron-icon icon="add-shopping-cart"></iron-icon>
-              Новая покупка
+              Список продуктов
             </paper-item>
           </a>
         </iron-selector>
@@ -336,16 +336,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         switch (page) {
           case 'shop-list':
             name = 'Мои магазины';
-            // this.$.insertButton.style.visibility = "visible";
-            this.$.insertButton.icon = "add";
+            this.$.insertButton.style.visibility = "visible";
+            // this.$.productList.style.visibility="hidden";
+            // this.$.insertButton.icon = "add";
             break;
           case 'purchase-list':
             name = 'Мои покупки';
-            this.$.insertButton.icon = "add";
+            this.$.insertButton.style.visibility = "visible";
+            // this.$.productList.style.visibility="hidden";
+            // this.$.insertButton.icon = "add";
             break;
           case 'product-list':
             name = 'Список продуктов';
-            this.$.insertButton.icon = "save";
+            this.$.insertButton.style.visibility = "hidden";
+            // this.$.productList.style.visibility="visible";
+            // this.$.insertButton.icon = "save";
             break;
           default:
             name = 'Best price';
