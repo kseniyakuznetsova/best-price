@@ -35,7 +35,7 @@
 <dom-module id="product-list">
     <template>
         <style>
-             :host {
+            :host {
                 --app-primary-color: #ef6b01;
                 --app-hover-color: #fa9d10;
                 --app-button-color: #fef200;
@@ -139,6 +139,13 @@
                 background-color: #cecece;
             }
 
+            paper-input[disabled] {
+                --paper-input-container-input-color: var(--app-primary-color);
+                --paper-input-container-disabled: {
+                    opacity: 1;
+                }
+            }
+
             paper-button.qr-button {
                 float: left;
                 margin-left: 5%;
@@ -177,6 +184,33 @@
                     margin: 1% 5%;
                     padding-bottom: 5px;
                 }
+            }
+
+            paper-dialog#cheaperProductsDialog,
+            paper-dialog#qrScanDialog {
+                /* position: fixed;
+                top: 50%;
+                left: 40%;
+                right: 30%;
+                padding: 0;
+                margin: 0; */
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+            }
+
+            #preview {
+                height: 30%;
+                width: 100%;
+            }
+
+
+
+            paper-item {
+                background-color: white;
             }
 
             /* 
@@ -223,7 +257,14 @@
                     margin-right: 2%;
                     margin-top: 1%;
                 }
-
+                #preview {
+                    height: 50%;
+                    width: 100%;
+                }
+                /* paper-dialog#cheaperProductsDialog {
+                    width: 60%;
+                    left: 20%;
+                } */
             }
 
             #product-image {
@@ -258,6 +299,11 @@
             div#product-delete {
                 float: right;
             }
+
+            .buttons {
+                float: right;
+                margin-top: 5px;
+            }
         </style>
 
         <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
@@ -267,7 +313,7 @@
         <!-- <paper-button class="custom save-button" on-click="save" raised>
                 <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button> -->
 
-                
+
         <paper-button class="custom save-button" id="saveProducts" on-click="save" raised>
             <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button>
 
@@ -340,54 +386,49 @@
         </paper-dialog>
 
         <paper-dialog id='qrScanDialog'>
+            <app-toolbar id="dialog-header">
+            </app-toolbar>
             <paper-dialog-scrollable>
-                <paper-input id="qrData"></paper-input>
+                <paper-input id="qrData" disabled></paper-input>
                 <video id="preview"></video>
 
+
                 <!-- <div style="text-align:center; margin-top:1em;">Last decoded QR Code: [[data]]</div> -->
-                <div class='buttons'>
-                    <paper-button on-click='qrDialogDismiss'>Cancel</paper-button>
-                    <paper-button on-click='sendRequest'>Add</paper-button>
-                </div>
+
             </paper-dialog-scrollable>
+            <div class='buttons'>
+                <paper-button on-click='qrDialogDismiss'>Отмена</paper-button>
+                <paper-button on-click='sendRequest'>Добавить</paper-button>
+            </div>
         </paper-dialog>
 
         <paper-dialog id='cheaperProductsDialog'>
+            <app-toolbar id="dialog-header">
+            </app-toolbar>
             <paper-dialog-scrollable>
                 <template is='dom-repeat' items='{{cheaperProducts}}'>
                     <paper-item>
-                        <div>
-                            <span>{{item.date}} </span>
-                        </div>
-                        <div>
-                            <span>{{item.idShop}} шт </span>
-                        </div>
-                        <div>
-                            <span>{{item.nameProduct}} руб</span>
-                        </div>
-                        <div>
-                            <span>{{item.priceProduct}} руб</span>
-                        </div>
+                        {{item.nameShop}}:&#8194; {{item.nameProduct}} &#8195;{{item.priceProduct}}&#8194;руб
                     </paper-item>
                 </template>
-
-                <div class='buttons'>
-                    <paper-button dialog-dismiss>Закрыть</paper-button>
-                </div>
             </paper-dialog-scrollable>
+            <div class='buttons'>
+                <paper-button dialog-dismiss>Закрыть</paper-button>
+            </div>
+
         </paper-dialog>
 
         <div id="container">
         </div>
 
-        <paper-toast id="toast" class="fit-bottom" duration="0" text="Эти продукты были дешевле">
-            <paper-button on-click="closeToastAndOpenDialog" class="yellow-button">Посмотреть</paper-button>
+        <paper-toast id="toast" class="fit-bottom" duration="0" text="Эти продукты стоили дешевле">
+            <paper-button on-click="closeToastAndOpenDialog" class="yellow-button">Просмотреть</paper-button>
         </paper-toast>
 
         <paper-toast id="toastError" class="fit-bottom" text="{{toastMessage}}">
         </paper-toast>
 
-        <iron-ajax id="requestRepos" url="http://10.60.10.4:8080/api/{{data}}" handle-as="json" on-response="handleResponse"></iron-ajax>
+        <iron-ajax id="requestRepos" url="http://10.60.10.4:8080/api/{{qr}}" handle-as="json" on-response="handleResponse"></iron-ajax>
 
     </template>
     <script>
@@ -404,7 +445,7 @@
                     type: Number
                 },
                 date: {
-                    type: Date
+                    type: Date,
                 },
                 products: {
                     type: Array,
@@ -417,9 +458,6 @@
                 shops: {
                     type: Array,
                     value: []
-                },
-                data: {
-                    type: String
                 },
                 product: {
                     type: Object
@@ -456,6 +494,9 @@
                 },
                 toastMessage: {
                     type: String
+                },
+                qr: {
+                    type: String
                 }
             },
             indexedDB: window.indexedDB || window.webkitIndexedDB ||
@@ -474,10 +515,10 @@
                 this.initDb();
                 this.getAllShops();
                 this.$.saveProducts.disabled = true;
-                this.idPurchase = null;
+                // this.idPurchase = null;
 
                 document.addEventListener('product-list', function (e) {
-                    self.save();                    
+                    self.save();
                 }, false);
 
                 document.addEventListener('viewPurchase', function (e) {
@@ -485,9 +526,19 @@
                     self.$.saveProducts.disabled = false;
                 }, false);
 
-                document.addEventListener('clearProducts', function (e) {
+                document.addEventListener('insertNewPurchase', function (e) {
                     self.products = [];
                     self.$.saveProducts.disabled = true;
+
+                    self.idPurchase = null;
+                    let curr_date = new Date().getDate();
+                    let curr_month = new Date().getMonth() + 1;
+                    if (curr_month < 10) curr_month = "0" + curr_month;
+                    if (curr_date < 10) curr_date = "0" + curr_date;
+                    let curr_year = new Date().getFullYear();
+                    let dateStr = curr_year.toString() + "-" + curr_month.toString() + "-" +
+                        curr_date.toString();
+                    self.date = dateStr;
                 }, false);
 
                 document.addEventListener('updateShopList', function (e) {
@@ -519,13 +570,6 @@
                     }, false);
                     // Send XHR
                     xhr.send();
-
-
-
-
-
-
-
                 }, false);
 
                 Instascan.Camera.getCameras().then((cameras) => {
@@ -535,8 +579,9 @@
                         mirror: cameras.length == 1
                     });
                     self.scanner.addListener('scan', function (content, image) {
-                        console.log(content)
-                        self.$.qrData.value = content;
+                        // console.log(content)
+                        self.$.qrData.value = "QR-код распознан";
+                        self.qr = content;
                         self.scans.unshift({
                             date: +(Date.now()),
                             content: content
@@ -555,9 +600,9 @@
                     });
                 });
 
-                if (document.body.clientHeight > document.body.clientWidth)
-                    this.$.preview.style.width = "100%";
-                else this.$.preview.style.height = "80%";
+                // if (document.body.clientHeight > document.body.clientWidth)
+                //     this.$.preview.style.width = "100%";
+                // else this.$.preview.style.height = "80%";
             },
             initDb: function () {
                 var request = this.indexedDB.open("BestPriceDatabase", 1);
@@ -716,7 +761,7 @@
                 var db;
                 var idShop = Number(this.$.shopMenu.selectedItem.getAttribute("id"));
                 var self = this;
-                if (this.idPurchase == null) {
+                if (this.idPurchase === null) {
                     var request = this.indexedDB.open("BestPriceDatabase", 1);
                     request.onsuccess = function (evt) {
                         db = request.result;
@@ -761,7 +806,8 @@
 
 
                             };
-                            self.$.saveProducts.disabled = true;                            
+                            self.$.saveProducts.disabled = true;
+                            self.idPurchase = null;
                         }
                     };
                 } else {
@@ -781,10 +827,6 @@
 
                         self.deleteProducts();
                         self.$.saveProducts.disabled = true;
-
-
-
-
                     }
                 }
             },
@@ -806,7 +848,7 @@
                 }
             },
             sendRequest: function () {
-                this.data = this.$.qrData.value;
+                // this.data = this.$.qrData.value;
                 this.$.qrScanDialog.close();
                 if (window.navigator.onLine) {
                     this.$.requestRepos.generateRequest();
@@ -845,10 +887,15 @@
                                     Number(cheaperProduct.priceProduct)) &&
                                 (event.target.result.value["nameProduct"] === product.nameProduct)
                             ) {
+                                let nameShop = "";
+                                let i = 0;
+                                while (self.shops[i].id !== event.target.result.value["idShop"]) i++;
+                                nameShop = self.shops[i].name;
                                 cheaperProduct = {
                                     date: (new Date(event.target.result.value[
                                         "date"])).toLocaleDateString(),
                                     idShop: event.target.result.value["idShop"],
+                                    nameShop: nameShop,
                                     nameProduct: event.target.result.value[
                                         "nameProduct"],
                                     priceProduct: event.target.result.value[
@@ -860,13 +907,19 @@
 
                         } else {
                             self.count++;
-                            if (cheaperProduct != product)
+                            if (cheaperProduct !== product)
                                 self.push('cheaperProducts', cheaperProduct);
                         }
 
 
-                        if (self.count == self.products.length && self.cheaperProducts.length !=
+                        if (self.count === self.products.length && self.cheaperProducts.length !==
                             0) {
+                            // let j;
+                            // for (j = 0; j < self.cheaperProducts.length; j++) {
+                            //     let i = 0;
+                            //     while (self.shops[i].id !== self.cheaperProducts[j].idShop) i++;
+                            //     self.cheaperProducts[j].nameShop = self.shops[i].name;
+                            // }
                             self.$.toast.open();
                         }
                     };
@@ -912,13 +965,11 @@
                             var imgURL = URL.createObjectURL(imgFile);
                             self.products[j].imageUrl = imgURL;
                         }
-
-
-                        
                     };
                 };
             },
             deleteProducts: function () {
+                var date = new Date(this.date).getTime();
                 var self = this;
                 var db;
                 var request = this.indexedDB.open("BestPriceDatabase", 1);
@@ -934,22 +985,29 @@
                             event.target.result['continue']();
                         }
 
-                        var transaction = db.transaction("product", 'readwrite');
-                        var objectStore = transaction.objectStore("product");
-                        var j;
-                        for (j = 0; j < self.products.length; j++) {
-                            objectStore.add({
-                                date: self.date,
-                                idPurchase: self.idPurchase,
-                                idShop: self.idShop,
-                                nameProduct: self.products[j].nameProduct,
-                                priceProduct: self.products[j].priceProduct,
-                                value: self.products[j].value
-                            });
-                        }
-
                     };
+                    var transaction = db.transaction("product", 'readwrite');
+                    var objectStore = transaction.objectStore("product");
+                    var j;
+                    for (j = 0; j < self.products.length; j++) {
+                        objectStore.add({
+                            // date: self.date,
+                            // idPurchase: self.idPurchase,
+                            // idShop: self.idShop,
+                            // nameProduct: self.products[j].nameProduct,
+                            // priceProduct: self.products[j].priceProduct,
+                            // value: self.products[j].value
+                            date: date,
+                            idPurchase: self.idPurchase,
+                            idShop: self.idShop,
+                            nameProduct: self.products[j].nameProduct,
+                            priceProduct: self.products[j].priceProduct,
+                            value: self.products[j].value,
+                            imageUrl: self.products[j].imageUrl,
+                        });
+                    }
                 }
+                // self.idPurchase = null;
             }
 
         })

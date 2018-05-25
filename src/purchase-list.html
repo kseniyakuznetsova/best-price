@@ -321,22 +321,6 @@
 
                 }
             },
-            save: function (e) {
-                var date = this.date;
-                var db;
-                var self = this;
-                var request = this.indexedDB.open("BestPriceDatabase", 1);
-                request.onsuccess = function (evt) {
-                    db = request.result;
-                    var transaction = db.transaction("productList", 'readwrite');
-                    var objectStore = transaction.objectStore("productList");
-                    objectStore.add({
-                        date: date,
-                        idShop: self.idShop,
-                        products: self.products
-                    });
-                }
-            },
             insertNewPurchase: function () {
                 var event = new CustomEvent('insertNewPurchase');
                 document.dispatchEvent(event);
