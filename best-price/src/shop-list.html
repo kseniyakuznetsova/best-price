@@ -1,0 +1,728 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+
+<link rel="import" href="../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="shop-list">
+    <template>
+        <style>
+            :host {
+                --app-primary-color: #ef6b01;
+                --app-hover-color: #fa9d10;
+                --app-button-color: #fef200;
+                --app-secondary-color: #888;
+            }
+
+            google-map {
+                /* height: 200px; */
+                min-height: 200px;
+            }
+
+            h3 {
+                color: var(--app-primary-color);
+            }
+
+            app-toolbar {
+                color: #fff;
+                background-color: var(--app-primary-color);
+            }
+
+            .clear {
+                clear: both;
+            }
+
+            .with-margin {
+                --paper-card: {
+                    /* margin: 1% 20%;
+                    width: 60%; */
+                    width: 90%;
+                    margin: 1% 5%;
+                }
+            }
+
+            .shop-image {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 50%;
+                height: 100%;
+                /* background: url('../images/pyaterochka.png'); */
+                background-size: cover;
+            }
+
+            .shop-name {
+                padding-left: 2%;
+                color: black;
+                @apply --paper-font-headline;
+                margin: 10px 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .shop-description {
+                padding-left: 1%;
+                color: var(--app-secondary-color);
+                margin: 10px 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                /* width: 100%; */
+            }
+
+            .update-fab {
+                background-color: var(--app-primary-color);
+                float: right;
+            }
+
+            .shop-icon {
+                width: 48px;
+                height: 48px;
+                float: left;
+            }
+
+            .shop-location-img {
+                padding-left: 1%;
+                color: var(--paper-grey-600);
+            }
+
+            .actions {
+                float: right;
+                /* color: var(--app-secondary-color); */
+                color: var(--app-primary-color);
+                font-size: 14px;
+                margin-bottom: 5px;
+                /* margin-bottom: 10px; */
+            }
+
+            paper-input.custom {
+                margin-bottom: 14px;
+                --primary-text-color: black;
+                --paper-input-container-color: var(--app-secondary-color);
+                --paper-input-container-focus-color: var(--app-primary-color);
+                --paper-input-container-invalid-color: red;
+            }
+
+            paper-item {
+                display: inline-block;
+            }
+
+            paper-dialog#insertShopDialog {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+            }
+
+            paper-dialog#imageDialog {
+                height: 80%;
+                width: 50%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+            }
+
+            paper-dialog#confirmDialog {
+                position: fixed;
+                top: 50%;
+                left: 40%;
+                right: 30%;
+                padding: 0;
+                margin: 0;
+            }
+
+            @media (max-width: 600px) {
+                .with-margin {
+                    --paper-card: {
+                        margin: 1% 5%;
+                        width: 90%;
+                    }
+                }
+                paper-dialog#imageDialog {
+                    height: 70%;
+                    width: 80%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 0;
+                    margin: 0;
+                }
+                paper-dialog#confirmDialog {
+                    width: 60%;
+                    left: 20%;
+                }
+            }
+
+            #dialog-header {
+                background-color: white;
+            }
+
+
+            paper-listbox {
+                column-count: 3;
+            }
+
+            #icon-shop {
+                border-radius: 50%;
+                width: 70px;
+                height: 70px;
+                border: 3px solid var(--app-primary-color);
+                background-color: #eeee;
+
+            }
+
+            #icon-shop:hover {
+                cursor: pointer;
+
+            }
+
+            #icon-shop iron-image {
+                display: block;
+                top: 10px;
+                left: 10px;
+            }
+
+            .buttons {
+                float: right;
+            }
+
+            paper-button {
+                color: var(--app-primary-color);
+            }
+
+            paper-input#search {
+                margin-bottom: 14px;
+                --primary-text-color: black;
+                --paper-input-container-color: var(--app-secondary-color);
+                --paper-input-container-focus-color: white;
+                border: none;
+                background-color: white;
+                padding-bottom: 5px;
+                --paper-input-container: {
+                    padding: 0;
+
+                }
+                ;
+                --paper-input-container-underline: {
+                    display: none;
+                    height: 0;
+                }
+                ;
+                --paper-input-container-underline-focus: {
+                    display: none;
+                }
+                ;
+
+            }
+
+            paper-input#search iron-icon {
+                padding: 0 10px;
+                color: var(--app-secondary-color);
+            }
+
+            div#not-found {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                color: var(--app-secondary-color);
+                /* margin-top: -50px; */
+                margin-left: -100px;
+                width: 200px;
+                height: 100px;
+            }
+        </style>
+        <paper-input id="search" value="{{searchString}}" placeholder="Поиск..." on-keydown="keyPressed">
+            <iron-icon icon="search" slot="prefix"></iron-icon>
+        </paper-input>
+
+
+        <paper-dialog id="insertShopDialog">
+
+            <app-toolbar id="dialog-header">
+                <!-- <div main-title>Создание нового магазина</div> -->
+            </app-toolbar>
+            <paper-dialog-scrollable>
+
+                <div id="icon-shop">
+                    <iron-image id="imageShop" src="{{selectedImage}}" on-click="openImageDialog"></iron-image>
+                </div>
+                <paper-dialog id='imageDialog'>
+                    <paper-dialog-scrollable>
+                        <paper-listbox attr-for-selected="image-src" selected="{{selectedImage}}" on-click='chooseImageShop'>
+                            <paper-item image-src="/images/pyaterochka.png">
+                                <iron-image src="/images/pyaterochka.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/perekrestok.png">
+                                <iron-image src="/images/perekrestok.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/lenta.png">
+                                <iron-image src="/images/lenta.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/magnit.png">
+                                <iron-image src="/images/magnit.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/karusel.png">
+                                <iron-image src="/images/karusel.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/auchan.png">
+                                <iron-image src="/images/auchan.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/cosmetic.png">
+                                <iron-image src="/images/cosmetic.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/sportmaster.png">
+                                <iron-image src="/images/sportmaster.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/kfc.png">
+                                <iron-image src="/images/kfc.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/mac.png">
+                                <iron-image src="/images/mac.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/burgerking.png">
+                                <iron-image src="/images/burgerking.png" />
+                            </paper-item>
+                            <paper-item image-src="/images/other.png">
+                                <iron-image src="/images/other.png" />
+                            </paper-item>
+                        </paper-listbox>
+                    </paper-dialog-scrollable>
+
+                </paper-dialog>
+                <paper-input class="custom" id="inputName" required label="Наименование" char-counter maxlength="30" error-message="Заполните поле"
+                    value="{{nameShop}}"></paper-input>
+                <paper-input class="custom " id="inputDescription" required label="Описание" char-counter maxlength="40" error-message="Заполните поле"
+                    value="{{descriptionShop}}"></paper-input>
+                <google-map zoom="12" fit-to-markers api-key="[[apiKey]]" latitude="53.195538" longitude="50.101783" draggable="true">
+                    <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}" draggable="true"></google-map-marker>
+                </google-map>
+
+                </br>
+                <div class='buttons'>
+                    <paper-button on-click="closeInsertShopDialog">Отмена</paper-button>
+                    <paper-button id="{{idShop}}" on-click="doAction">Сохранить</paper-button>
+                </div>
+            </paper-dialog-scrollable>
+            <!-- <div class='buttons'>
+                <paper-button on-click="closeInsertShopDialog">Отмена</paper-button>
+                <paper-button id="{{idShop}}" on-click="doAction">Сохранить</paper-button>
+            </div> -->
+        </paper-dialog>
+
+        <paper-dialog id="confirmDialog">
+            <h3>Удаление магазина</h3>
+            <p>Вы действительно хотите удалить выбранный магазин? Будут удалены покупки, совершенные в этом магазине. </p>
+            <div class="buttons">
+                <paper-button on-click="closeConfirmDialog">Отмена</paper-button>
+                <paper-button on-click="delete">Удалить</paper-button>
+            </div>
+        </paper-dialog>
+
+        <div id="not-found" hidden$="[[!isListEmpty]]"> Результатов не найдено </div>
+
+        <!-- <template is="dom-if" if="{{shops==null}}">
+            <div id="not-found"> Результатов не найдено </div>
+        </template> -->
+        <template is="dom-repeat" items="{{shops}}" id="shopList">
+            <paper-card class="with-margin">
+                <div class="card-content">
+                    <!-- <div class="shop-name">
+                        <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon> {{item.name}}</div> -->
+                    <paper-fab class="update-fab" mini icon="create" on-click="openUpdateShopDialog"></paper-fab>
+
+                    <div class="shop-icon">
+                        <iron-icon class="shop-icon" src="{{item.image}}"></iron-icon>
+                    </div>
+
+                    <div class="shop-name"> {{item.name}}
+                    </div>
+
+                    <div class="shop-description clear">{{item.description}}</div>
+                    <div>
+                        <google-map zoom="14" fit-to-markers api-key="[[apiKey]]" latitude="{{item.latitude}}" longitude="{{item.longitude}}" draggable="false">
+                            <google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}"> </google-map-marker>
+                        </google-map>
+                    </div>
+
+                </div>
+                <div class="card-actions">
+                    <!-- <paper-icon-button class="actions" icon="delete" on-click="openConfirmDialog">Удалить </paper-icon-button> -->
+                    <paper-button class="actions" icon="delete" on-click="openConfirmDialog">Удалить </paper-button>
+                </div>
+            </paper-card>
+        </template>
+    </template>
+    <script>
+        Polymer({
+            is: "shop-list",
+            properties: {
+                apiKey: {
+                    type: String,
+                    value: function () {
+                        return "AIzaSyDFsX7B97xHnLZWGD97X6ZGV8H9ZKBiJek";
+                    }
+                },
+                idShop: {
+                    type: Number
+                },
+                nameShop: {
+                    type: String
+                },
+                descriptionShop: {
+                    type: String
+                },
+                selectedImage: {
+                    type: String,
+                    value: "/images/other.png"
+                },
+                // imgs: {
+                //     type: Array,
+                //     value: []
+                // },
+                shops: {
+                    type: Array,
+                    value: []
+                },
+                searchString: {
+                    type: String
+                },
+                longitude: {
+                    type: Number,
+                    value: 50.101783
+                },
+                latitude: {
+                    type: Number,
+                    value: 53.195538
+                },
+                action: {
+                    type: String
+                },
+                isListEmpty: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            indexedDB: window.indexedDB || window.webkitIndexedDB ||
+                window.mozIndexedDB || window.msIndexedDB,
+            IDBTransaction: window.IDBTransaction || window.webkitIDBTransaction,
+            db: null,
+            ready: function () {
+                var self = this;
+                document.addEventListener('shop-list', function (e) {
+                    self.openInsertShopDialog();
+                }, false);
+                this.initDb();
+                this.getAllShops();
+            },
+            initDb: function () {
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    this.db = request.result;
+                };
+                request.onerror = function (evt) {
+                    console.log("IndexedDB error: " + evt.target.errorCode);
+                };
+                request.onupgradeneeded = function (evt) {
+                    var objectStore = evt.currentTarget.result.createObjectStore("shop", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("name", "name");
+                    objectStore.createIndex("coordinates", ["longitude", "latitude"]);
+
+                    var objectStore = evt.currentTarget.result.createObjectStore("productList", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("date_shop", ["date", "idShop"]);
+                    objectStore.createIndex("productListIndexShop", "idShop");
+
+                    var objectStore = evt.currentTarget.result.createObjectStore("product", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("productIndex", ["date", "idShop", "nameProduct"]);
+                    // objectStore.createIndex("productIndexName", "nameProduct");
+                    objectStore.createIndex("productIndexName", ["date", "nameProduct"]);
+                    objectStore.createIndex("productIndexPurchase", "idPurchase");
+                    objectStore.createIndex("productIndexShop", "idShop");
+                }
+            },
+            addShop: function () {
+                var db;
+                var self = this;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readwrite');
+                    var objectStore = transaction.objectStore("shop");
+                    objectStore.add({
+                        name: self.nameShop,
+                        description: self.descriptionShop,
+                        longitude: self.longitude,
+                        latitude: self.latitude,
+                        image: self.$.imageShop.src
+                    });
+                    self.getAllShops();
+                    document.dispatchEvent(new CustomEvent('updateShopList'));
+                    self.$.insertShopDialog.close();
+                }
+            },
+            // getData: function () {
+            //     var name = this.nameShop;
+            //     var db;
+            //     var request = this.indexedDB.open("BestPriceDatabase", 1);
+            //     request.onsuccess = function (evt) {
+            //         db = request.result;
+            //         var transaction = db.transaction("shop", 'readwrite');
+            //         var objectStore = transaction.objectStore("shop");
+            //         var index = objectStore.index("name");
+            //         var getBob = index.get(name);
+
+            //         getBob.onsuccess = function () {
+            //             this.descriptionShop = "111";
+            //             console.log(this.descriptionShop);
+            //         };
+            //     };
+            // },
+            getAllShops: function () {
+                this.shops = [];
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                var self = this;
+
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readwrite');
+                    var objectStore = transaction.objectStore("shop");
+                    var cursors = objectStore.openCursor();
+                    cursors.onsuccess = function (event) {
+                        if (event.target.result) {
+                            self.push('shops', {
+                                id: event.target.result.value["id"],
+                                name: event.target.result.value["name"],
+                                description: event.target.result.value["description"],
+                                latitude: event.target.result.value["latitude"],
+                                longitude: event.target.result.value["longitude"],
+                                image: event.target.result.value["image"]
+                            });
+                            event.target.result['continue']();
+                        }
+                    };
+                };
+            },
+            delete: function (e) {
+                // var item = this.$.shopList.itemForElement(e.target);
+                var db;
+                var self = this;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readwrite');
+                    var objectStore = transaction.objectStore("shop");
+                    // var objectStoreRequest = objectStore.delete(item.id);
+                    var objectStoreRequest = objectStore.delete(self.idShop);
+
+
+                    objectStoreRequest.onsuccess = function (evt) {
+                        var transactionProduct = db.transaction("product", 'readwrite');
+                        var objectStoreProduct = transactionProduct.objectStore("product");
+                        var index = objectStoreProduct.index("productIndexShop");
+                        var cursors = index.openCursor(IDBKeyRange.only(self.idShop));
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                objectStoreProduct.delete(event.target.result.value["id"]);
+                                event.target.result['continue']();
+                            }
+                        };
+
+                        var transactionProduct = db.transaction("productList", 'readwrite');
+                        var objectStoreProductList = transactionProduct.objectStore("productList");
+                        var index = objectStoreProductList.index("productListIndexShop");
+                        var cursors = index.openCursor(IDBKeyRange.only(self.idShop));
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                objectStoreProductList.delete(event.target.result.value["id"]);
+                                event.target.result['continue']();
+                            }
+                        };
+                        document.dispatchEvent(new CustomEvent('updateShopList'));
+                        self.getAllShops();
+                        self.searchString = "";
+                        self.closeConfirmDialog();
+                    };
+                }
+            },
+            update: function (e) {
+                var db;
+                var self = this;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readwrite');
+                    var objectStore = transaction.objectStore("shop");
+                    objectStore.put({
+                        id: self.idShop,
+                        name: self.nameShop,
+                        description: self.descriptionShop,
+                        longitude: self.longitude,
+                        latitude: self.latitude,
+                        image: self.$.imageShop.src
+                    });
+                    self.getAllShops();
+                    document.dispatchEvent(new CustomEvent('updateShopList'));
+                }
+                this.$.insertShopDialog.close();
+            },
+            filter: function () {
+                this.shops = [];
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                var self = this;
+
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readonly');
+                    var objectStore = transaction.objectStore("shop");
+                    var index = objectStore.index("name");
+                    if (self.searchString.trim() == "") {
+                        var cursors = objectStore.openCursor();
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                self.push('shops', {
+                                    id: event.target.result.value["id"],
+                                    name: event.target.result.value["name"],
+                                    description: event.target.result.value["description"],
+                                    latitude: event.target.result.value["latitude"],
+                                    longitude: event.target.result.value["longitude"],
+                                    image: event.target.result.value["image"]
+                                });
+                                event.target.result['continue']();
+                            }
+                        };
+                        self.isListEmpty = false;
+                    } else {
+                        var cursors = index.openCursor(IDBKeyRange.bound(self.searchString.trim(), self
+                            .searchString.trim() +
+                            '\uffff', true, true));
+                        cursors.onsuccess = function (event) {
+                            if (event.target.result) {
+                                self.push('shops', {
+                                    id: event.target.result.value["id"],
+                                    name: event.target.result.value["name"],
+                                    description: event.target.result.value["description"],
+                                    latitude: event.target.result.value["latitude"],
+                                    longitude: event.target.result.value["longitude"],
+                                    image: event.target.result.value["image"]
+                                });
+                                event.target.result['continue']();
+                                self.isListEmpty = false;
+                            } else {
+                                self.isListEmpty = true;
+                            }
+                        };
+                    }
+
+                };
+            },
+            openInsertShopDialog: function () {
+                this.$.inputDescription.invalid = false;
+                this.$.inputName.invalid = false;
+                this.action = "addShop";
+                this.nameShop = "";
+                this.descriptionShop = "";
+                this.longitude = 50.101783;
+                this.latitude = 53.195538;
+                this.selectedImage = "/images/other.png";
+                this.searchString = "";
+                this.$.insertShopDialog.open();
+            },
+            openUpdateShopDialog: function (e) {
+                this.action = "update";
+                var item = this.$.shopList.itemForElement(e.target);
+                this.nameShop = item.name;
+                this.descriptionShop = item.description;
+                this.longitude = item.longitude;
+                this.latitude = item.latitude;
+                this.selectedImage = item.image;
+                this.idShop = item.id;
+                this.searchString = "";
+                this.$.insertShopDialog.open();
+            },
+            doAction: function () {
+                let valid = true;
+                if (this.nameShop.trim() == "") {
+                    this.$.inputName.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputName.invalid = false;
+                }
+                if (this.descriptionShop.trim() == "") {
+                    this.$.inputDescription.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputDescription.invalid = false;
+                }
+                if (valid) {
+                    if (this.action == "update") {
+                        this.update();
+                    } else {
+                        this.addShop();
+                    }
+                }
+            },
+            openImageDialog: function () {
+                // this.images = [];
+                // for (var i = 0; i < localStorage.length; i++) {
+                //     key = localStorage.key(i);
+                //     this.push('images', localStorage.getItem(key));
+                // }
+                this.$.imageDialog.open();
+
+            },
+            openConfirmDialog: function (evt) {
+                this.idShop = this.$.shopList.itemForElement(evt.target).id;
+                this.$.confirmDialog.open();
+            },
+            closeConfirmDialog: function () {
+                this.$.confirmDialog.close();
+            },
+            closeInsertShopDialog: function () {
+                this.$.insertShopDialog.close();
+            },
+            chooseImageShop: function (evt) {
+                this.$.imageShop.src = this.selectedImage;
+                this.$.imageDialog.close();
+            },
+            keyPressed: function (evt) {
+                if ((this.searchString == "" && !(evt.which == 8 || evt.keyCode == 8)) || this.searchString
+                    .trim() != "")
+                    this.filter();
+            }
+        })
+    </script>
+</dom-module>

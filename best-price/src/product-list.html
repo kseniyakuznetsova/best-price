@@ -1,0 +1,1023 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/vaadin-themes/material/vaadin-date-picker.html">
+<link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel='import' href='../bower_components/paper-dialog/paper-dialog.html' />
+<link rel='import' href='../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html' />
+<link rel='import' href='../bower_components/paper-dialog-lite/paper-dialog-lite.html' />
+<link rel='import' href='../bower_components/isw-dialog/isw-dialog.html' />
+<link rel='import' href='../bower_components/isw-dialog/isw-dialog-remote.html' />
+<link rel='import' href='../bower_components/paper-fab/paper-fab.html' />
+<link rel='import' href='../bower_components/paper-listbox/paper-listbox.html' />
+<link rel='import' href='../bower_components/paper-item/paper-item.html' />
+<link rel='import' href='../bower_components/paper-icon-button/paper-icon-button.html' />
+<link rel='import' href='../bower_components/paper-dropdown-menu/paper-dropdown-menu.html' />
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html" />
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/file-input/image-input.html">
+<link rel="import" href="../bower_components/paper-number-input/paper-number-input.html">
+<link rel="import" href="../bower_components/vaadin-icons/vaadin-icons.html">
+
+
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+
+<script src="../bower_components/instascan.min/index.js"></script>
+
+<link rel="lazy-import" href="purchase-list.html">
+
+<dom-module id="product-list">
+    <template>
+        <style>
+            :host {
+                --app-primary-color: #ef6b01;
+                --app-hover-color: #fa9d10;
+                --app-button-color: #fef200;
+                --app-secondary-color: #888;
+                --material-primary-color: #ef6b01;
+            }
+
+            google-map {
+                height: 300px;
+            }
+
+            paper-dropdown-menu {
+                width: 200px;
+                margin-right: 20px;
+            }
+
+            .yellow-button {
+                text-transform: none;
+                color: #eeff41;
+            }
+
+            paper-input.custom {
+                margin-bottom: 14px;
+                --primary-text-color: black;
+                --paper-input-container-color: var(--app-secondary-color);
+                --paper-input-container-focus-color: var(--app-primary-color);
+                --paper-input-container-invalid-color: red;
+            }
+
+            paper-number-input {
+                --paper-input-container-label: {
+                    text-align: left;
+                }
+                ;
+                --primary-text-color: black;
+                --paper-input-container-color: var(--app-secondary-color);
+                --paper-input-container-focus-color: var(--app-primary-color);
+            }
+
+            paper-button {
+                color: var(--app-primary-color);
+            }
+
+            paper-toast {
+                text-align: right;
+            }
+
+            paper-listbox {
+                background-color: #eeee;
+            }
+
+            paper-item {
+                background-color: #eeee;
+            }
+
+            paper-dialog#addProductDialog {
+                position: fixed;
+                top: 30%;
+                left: 40%;
+                right: 30%;
+                padding: 0;
+                margin: 0;
+            }
+
+
+
+            vaadin-date-picker {
+                margin-top: 2%;
+                margin-left: 5%;
+                width: 90%;
+
+            }
+
+
+            paper-dropdown-menu {
+                margin: 0 5%;
+                width: 90%;
+            }
+
+            paper-button {
+                color: var(--app-primary-color);
+                font-size: 14px;
+            }
+
+            paper-button.custom {
+                background-color: #EE7A03;
+                color: white;
+                --paper-button-ink-color: var(--app-primary-color);
+                --paper-button-flat-keyboard-focus: {
+                    background-color: var(--app-primary-color);
+                    color: white;
+                }
+            }
+
+            paper-button.custom:hover {
+                background-color: var(--app-primary-color);
+                color: white;
+            }
+
+            paper-button.custom[disabled] {
+                background-color: #cecece;
+            }
+
+            paper-input[disabled] {
+                --paper-input-container-input-color: var(--app-primary-color);
+                --paper-input-container-disabled: {
+                    opacity: 1;
+                }
+            }
+
+            paper-button.qr-button {
+                float: left;
+                margin-left: 5%;
+                margin-right: 2%;
+                width: 43%;
+            }
+
+            paper-button.hand-button {
+                float: right;
+                margin-right: 5%;
+                margin-bottom: 2%;
+                width: 43%;
+            }
+
+            paper-button.save-button {
+                float: right;
+                margin-right: 5%;
+                margin-top: 1%;
+
+                background-color: var(--app-hover-color);
+            }
+
+            paper-dropdown-menu {
+                margin-bottom: 14px;
+                --primary-text-color: black;
+                --paper-input-container-color: var(--app-secondary-color);
+                --paper-input-container-focus-color: var(--app-primary-color);
+                --paper-input-container-invalid-color: red;
+            }
+
+            .with-margin {
+                --paper-card: {
+                    /* margin: 1% 20%;
+                    width: 60%; */
+                    width: 90%;
+                    margin: 1% 5%;
+                    padding-bottom: 5px;
+                }
+            }
+
+            paper-dialog#cheaperProductsDialog,
+            paper-dialog#qrScanDialog {
+                /* position: fixed;
+                top: 50%;
+                left: 40%;
+                right: 30%;
+                padding: 0;
+                margin: 0; */
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+            }
+
+            #preview {
+                height: 30%;
+                width: 100%;
+            }
+
+
+
+            paper-item {
+                background-color: white;
+            }
+
+            /* 
+            paper-fab {
+                background-color: var(--app-primary-color);
+                float: right;
+                position: absolute;
+                bottom: 60px;
+                right: 24px
+            } */
+
+            @media (max-width: 600px) {
+                .with-margin {
+                    --paper-card: {
+                        margin: 1% 2%;
+                        width: 96%;
+                        padding-bottom: 5px;
+                    }
+                }
+                paper-dialog#addProductDialog {
+                    width: 60%;
+                    left: 20%;
+                }
+                vaadin-date-picker {
+                    margin-left: 2%;
+                    width: 96%;
+                }
+
+                paper-dropdown-menu {
+                    margin: 0 2%;
+                    width: 96%;
+                }
+                paper-button.qr-button {
+                    margin-left: 2%;
+                    margin-right: 2%;
+                    width: 45%;
+                }
+
+                paper-button.hand-button {
+                    margin-right: 2%;
+                    width: 45%;
+                }
+                paper-button.save-button {
+                    margin-right: 2%;
+                    margin-top: 1%;
+                }
+                #preview {
+                    height: 50%;
+                    width: 100%;
+                }
+                /* paper-dialog#cheaperProductsDialog {
+                    width: 60%;
+                    left: 20%;
+                } */
+            }
+
+            #product-image {
+                float: left;
+            }
+
+            #product-info {
+                float: left;
+                margin-left: 10px;
+            }
+
+            .product-name {
+                margin-top: 5px;
+                padding-left: 10px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .product-price {
+                float: left;
+                padding-left: 10px;
+                color: var(--app-secondary-color);
+            }
+
+            paper-icon-button.product-delete {
+                margin-bottom: 10px;
+                color: var(--app-secondary-color);
+            }
+
+
+            div#product-delete {
+                float: right;
+            }
+
+            .buttons {
+                float: right;
+                margin-top: 5px;
+            }
+        </style>
+
+        <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
+        </app-location>
+
+
+        <!-- <paper-button class="custom save-button" on-click="save" raised>
+                <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button> -->
+
+
+        <paper-button class="custom save-button" id="saveProducts" on-click="save" raised>
+            <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button>
+
+        <vaadin-date-picker label="Дата покупки" value={{date}}>
+        </vaadin-date-picker>
+
+        <paper-dropdown-menu label="Магазин">
+            <paper-listbox slot="dropdown-content" selected="1" attr-for-selected="id" id="shopMenu">
+                <template is='dom-repeat' items='{{shops}}'>
+                    <paper-item id="[[item.id]]">
+                        {{item.name}}: {{item.description}}
+                    </paper-item>
+                </template>
+            </paper-listbox>
+        </paper-dropdown-menu>
+
+        <paper-button class="custom qr-button" on-click="openQrScanDialog" raised>
+            <iron-icon icon="vaadin:qrcode"></iron-icon>&#8195;По qr-коду</paper-button>
+        <paper-button class="custom hand-button" on-click="openAddProductDialog" raised>
+            <iron-icon icon="vaadin:hand"></iron-icon> &#8195;Вручную</paper-button>
+
+
+        <!-- <paper-fab icon='add' style='position:absolute; bottom: 10px; right:24px' on-click='openQrScanDialog'>
+            </paper-fab>
+    
+            <paper-fab icon='add' style='position:absolute; bottom: 60px; right:24px' on-click='openAddProductDialog'>
+            </paper-fab> -->
+
+
+        <paper-listbox selected={{selectedItem}}>
+            <template is='dom-repeat' items='{{products}}' id="productList">
+                <paper-card class="with-margin">
+                    <div class="card-content">
+                        <div id="product-image">
+                            <image-input id="imageProduct" default-image="{{item.imageUrl}}"></image-input>
+                        </div>
+                        <!-- <div id="product-info"> -->
+                        <div class="product-name"> {{item.nameProduct}}
+                        </div>
+                        <div class="product-price">
+                            {{item.countProduct}}&#8194;шт &#8194;&#215;&#8194; {{item.priceProduct}}&#8194;руб&#8194;=&#8194;{{item.sumProduct}}&#8194;руб
+                        </div>
+                        <!-- </div> -->
+                        <div id="product-delete">
+                            <paper-icon-button icon='delete' class='product-delete' on-click='deleteProduct'>
+                            </paper-icon-button>
+                        </div>
+
+                    </div>
+                </paper-card>
+            </template>
+        </paper-listbox>
+
+
+        <paper-dialog id='addProductDialog'>
+            <paper-input class="custom" id="inputName" required label="Наименование" char-counter maxlength="50" error-message="Заполните поле"
+                value="{{nameProduct}}"></paper-input>
+            <paper-input class="custom" id="inputPrice" required label="Цена" error-message="Заполните корректно поле" value="{{priceProduct}}"
+                type="number">
+                <div slot="suffix">руб.</div>
+            </paper-input>
+            <paper-number-input id="inputCount" required label="Количество" min="1" max="100" value="{{countProduct}}" step="1" fallback-value="1"
+                error-message="Заполните поле"></paper-number-input>
+            <!-- <paper-input value="{{countProduct}}" placeholder="Количество"></paper-input> -->
+
+            <div class='buttons'>
+                <paper-button on-click='closeAddProductDialog'>Отмена</paper-button>
+                <paper-button on-click='addProduct'>Добавить</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id='qrScanDialog'>
+            <app-toolbar id="dialog-header">
+            </app-toolbar>
+            <paper-dialog-scrollable>
+                <paper-input id="qrData" disabled></paper-input>
+                <video id="preview"></video>
+
+
+                <!-- <div style="text-align:center; margin-top:1em;">Last decoded QR Code: [[data]]</div> -->
+
+            </paper-dialog-scrollable>
+            <div class='buttons'>
+                <paper-button on-click='qrDialogDismiss'>Отмена</paper-button>
+                <paper-button on-click='sendRequest'>Добавить</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id='cheaperProductsDialog'>
+            <app-toolbar id="dialog-header">
+            </app-toolbar>
+            <paper-dialog-scrollable>
+                <template is='dom-repeat' items='{{cheaperProducts}}'>
+                    <paper-item>
+                        {{item.nameShop}}:&#8194; {{item.nameProduct}} &#8195;{{item.priceProduct}}&#8194;руб
+                    </paper-item>
+                </template>
+            </paper-dialog-scrollable>
+            <div class='buttons'>
+                <paper-button dialog-dismiss>Закрыть</paper-button>
+            </div>
+
+        </paper-dialog>
+
+        <div id="container">
+        </div>
+
+        <paper-toast id="toast" class="fit-bottom" duration="0" text="Эти продукты стоили дешевле">
+            <paper-button on-click="closeToastAndOpenDialog" class="yellow-button">Просмотреть</paper-button>
+        </paper-toast>
+
+        <paper-toast id="toastError" class="fit-bottom" text="{{toastMessage}}">
+        </paper-toast>
+
+        <iron-ajax id="requestRepos" url="https://192.168.43.162:8443/api/{{qr}}" handle-as="json" on-response="handleResponse"></iron-ajax>
+
+    </template>
+    <script>
+        Polymer({
+            is: "product-list",
+            properties: {
+                nameShop: {
+                    type: String
+                },
+                descriptionShop: {
+                    type: String
+                },
+                idShop: {
+                    type: Number
+                },
+                date: {
+                    type: Date,
+                },
+                products: {
+                    type: Array,
+                    value: []
+                },
+                cheaperProducts: {
+                    type: Array,
+                    value: []
+                },
+                shops: {
+                    type: Array,
+                    value: []
+                },
+                product: {
+                    type: Object
+                },
+                rootPath: {
+                    type: String
+                },
+                count: {
+                    type: Number
+                },
+                scanner: {
+                    type: Object,
+                    value: null
+                },
+                activeCameraId: {
+                    type: String,
+                    value: null
+                },
+                cameras: {
+                    type: Array,
+                    value: []
+                },
+                scans: {
+                    type: Array,
+                    value: []
+                },
+                selectedItem: {
+                    type: String,
+                    observer: 'test'
+                },
+                idPurchase: {
+                    type: Number,
+                    value: null
+                },
+                toastMessage: {
+                    type: String
+                },
+                qr: {
+                    type: String
+                }
+            },
+            indexedDB: window.indexedDB || window.webkitIndexedDB ||
+                window.mozIndexedDB || window.msIndexedDB,
+            IDBTransaction: window.IDBTransaction || window.webkitIDBTransaction,
+            db: null,
+            ready: function () {
+                var self = this;
+                var curr_date = new Date().getDate();
+                var curr_month = new Date().getMonth() + 1;
+                if (curr_month < 10) curr_month = "0" + curr_month;
+                if (curr_date < 10) curr_date = "0" + curr_date;
+                var curr_year = new Date().getFullYear();
+                var dateStr = curr_year.toString() + "-" + curr_month.toString() + "-" + curr_date.toString();
+                this.date = dateStr;
+                this.initDb();
+                this.getAllShops();
+                this.$.saveProducts.disabled = true;
+                // this.idPurchase = null;
+
+                document.addEventListener('product-list', function (e) {
+                    self.save();
+                }, false);
+
+                document.addEventListener('viewPurchase', function (e) {
+                    self.getProducts(e.detail.id);
+                    self.$.saveProducts.disabled = false;
+                }, false);
+
+                document.addEventListener('insertNewPurchase', function (e) {
+                    self.products = [];
+                    self.$.saveProducts.disabled = true;
+
+                    self.idPurchase = null;
+                    let curr_date = new Date().getDate();
+                    let curr_month = new Date().getMonth() + 1;
+                    if (curr_month < 10) curr_month = "0" + curr_month;
+                    if (curr_date < 10) curr_date = "0" + curr_date;
+                    let curr_year = new Date().getFullYear();
+                    let dateStr = curr_year.toString() + "-" + curr_month.toString() + "-" +
+                        curr_date.toString();
+                    self.date = dateStr;
+                }, false);
+
+                document.addEventListener('updateShopList', function (e) {
+                    self.getAllShops();
+                }, false);
+
+                document.addEventListener('newImage', function (e) {
+                    var file = e.detail.value;
+                    var xhr = new XMLHttpRequest(),
+                        blob;
+
+                    xhr.open("GET", file, true);
+                    // Set the responseType to blob
+                    xhr.responseType = "blob";
+
+                    xhr.addEventListener("load", function () {
+                        if (xhr.status === 200) {
+                            console.log("Image retrieved");
+
+                            // Blob as response
+                            blob = xhr.response;
+                            console.log("Blob:" + blob);
+
+                            // Put the received blob into IndexedDB
+
+                            self.products[self.selectedItem].value = blob;
+                            self.products[self.selectedItem].imageUrl = file;
+                        }
+                    }, false);
+                    // Send XHR
+                    xhr.send();
+                }, false);
+
+                Instascan.Camera.getCameras().then((cameras) => {
+                    self.scanner = new Instascan.Scanner({
+                        video: this.$.preview,
+                        scanPeriod: 5,
+                        mirror: cameras.length == 1
+                    });
+                    self.scanner.addListener('scan', function (content, image) {
+                        // console.log(content)
+                        self.$.qrData.value = "QR-код распознан";
+                        self.qr = content;
+                        self.scans.unshift({
+                            date: +(Date.now()),
+                            content: content
+                        });
+                    });
+                    Instascan.Camera.getCameras().then(function (cameras) {
+                        self.cameras = cameras;
+                        if (cameras.length > 0) {
+                            self.activeCameraId = cameras[0].id;
+                            self.scanner.start(cameras.length > 1 ? cameras[1] : cameras[0]);
+                        } else {
+                            console.error('No cameras found.');
+                        }
+                    }).catch(function (e) {
+                        console.error(e);
+                    });
+                });
+
+                // if (document.body.clientHeight > document.body.clientWidth)
+                //     this.$.preview.style.width = "100%";
+                // else this.$.preview.style.height = "80%";
+            },
+            initDb: function () {
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    this.db = request.result;
+                };
+                request.onerror = function (evt) {
+                    console.log("IndexedDB error: " + evt.target.errorCode);
+                };
+                request.onupgradeneeded = function (evt) {
+                    var objectStore = evt.currentTarget.result.createObjectStore("shop", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("name", "name");
+                    objectStore.createIndex("coordinates", ["longitude", "latitude"]);
+
+                    var objectStore = evt.currentTarget.result.createObjectStore("productList", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("date_shop", ["date", "idShop"]);
+                    objectStore.createIndex("productListIndexShop", "idShop");
+
+                    var objectStore = evt.currentTarget.result.createObjectStore("product", {
+                        keyPath: "id",
+                        autoIncrement: true
+                    });
+                    objectStore.createIndex("productIndex", ["date", "idShop", "nameProduct"]);
+                    // objectStore.createIndex("productIndexName", "nameProduct");
+                    objectStore.createIndex("productIndexName", ["date", "nameProduct"]);
+                    objectStore.createIndex("productIndexPurchase", "idPurchase");
+                    objectStore.createIndex("productIndexShop", "idShop");
+                };
+            },
+            getAllShops: function () {
+                this.shops = [];
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                var self = this;
+
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("shop", 'readwrite');
+                    var objectStore = transaction.objectStore("shop");
+                    var cursors = objectStore.openCursor();
+                    cursors.onsuccess = function (event) {
+                        if (event.target.result) {
+                            // self.push('markers', {
+                            //     latitude: event.target.result.value["latitude"],
+                            //     longitude: event.target.result.value["longitude"]
+                            // });
+                            self.push('shops', {
+                                id: event.target.result.value["id"],
+                                name: event.target.result.value["name"],
+                                description: event.target.result.value["description"]
+                            });
+                            event.target.result['continue']();
+                        }
+                    };
+                };
+            },
+            // markerClick: function (event) {
+            //     var longitude = event.target.longitude;
+            //     var latitude = event.target.latitude;
+
+            //     var self = this;
+            //     var db;
+            //     var request = this.indexedDB.open("BestPriceDatabase", 1);
+            //     request.onsuccess = function (evt) {
+            //         db = request.result;
+            //         var transaction = db.transaction("shop", 'readwrite');
+            //         var objectStore = transaction.objectStore("shop");
+            //         var index = objectStore.index("coordinates");
+            //         var getShop = index.get([longitude, latitude]);
+
+            //         getShop.onsuccess = function (evt) {
+            //             self.nameShop = getShop.result.name;
+            //             self.descriptionShop = getShop.result.description;
+            //             self.idShop = getShop.result.id;
+            //         };
+            //     };
+            // },
+            openAddProductDialog: function () {
+                this.$.inputPrice.invalid = false;
+                this.$.inputName.invalid = false;
+                this.$.inputCount.invalid = false;
+                this.nameProduct = "";
+                this.countProduct = "";
+                this.priceProduct = "";
+                this.$.addProductDialog.open();
+
+            },
+            closeAddProductDialog: function () {
+                this.$.addProductDialog.close();
+            },
+            openQrScanDialog: function () {
+                if (window.navigator.onLine) {
+                    this.$.qrScanDialog.open();
+                } else {
+                    this.toastMessage = "Отсутствует соединение с сетью";
+                    this.$.toastError.open();
+                }
+            },
+            addProduct: function () {
+                let self = this;
+                let valid = true;
+
+                if (this.nameProduct.trim() == "") {
+                    this.$.inputName.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputName.invalid = false;
+                }
+                if (this.priceProduct > 99999 || this.priceProduct.trim() == "") {
+                    this.$.inputPrice.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputPrice.invalid = false;
+                }
+                if (this.countProduct.trim() == "") {
+                    this.$.inputCount.invalid = true;
+                    valid = false;
+                } else {
+                    this.$.inputCount.invalid = false;
+                }
+                if (valid) {
+
+                    this.push('products', {
+                        nameProduct: self.nameProduct.toUpperCase(),
+                        countProduct: self.countProduct,
+                        priceProduct: self.priceProduct,
+                        sumProduct: Number(self.priceProduct) * Number(self.countProduct),
+                        value: null,
+                        imageUrl: "/images/product-background.png"
+                    });
+                    this.nameProduct = "";
+                    this.countProduct = "";
+                    this.priceProduct = "";
+                    this.$.saveProducts.disabled = false;
+
+                    this.$.addProductDialog.close();
+                }
+                //this.updateTasks();
+            },
+            deleteProduct: function (e) {
+                var item = e.model.item;
+                var index = this.products.indexOf(item);
+                this.splice('products', index, 1);
+                if (this.products.length < 1)
+                    this.$.saveProducts.disabled = true;
+            },
+            save: function (e) {
+
+                var date = new Date(this.date).getTime();
+                var db;
+                var idShop = Number(this.$.shopMenu.selectedItem.getAttribute("id"));
+                var self = this;
+                if (this.idPurchase === null) {
+                    var request = this.indexedDB.open("BestPriceDatabase", 1);
+                    request.onsuccess = function (evt) {
+                        db = request.result;
+                        var transaction = db.transaction("productList", 'readwrite');
+                        var objectStore = transaction.objectStore("productList");
+                        var objectStoreRequest = objectStore.add({
+                            date: date,
+                            idShop: idShop,
+                            products: self.products
+                        });
+
+                        objectStoreRequest.onsuccess = function (evt) {
+                            var purchaseId = evt.target.result;
+                            var transaction = db.transaction("product", 'readwrite');
+                            var objectStore = transaction.objectStore("product");
+                            var j;
+                            for (j = 0; j < self.products.length; j++) {
+                                objectStore.add({
+                                    date: date,
+                                    idPurchase: purchaseId,
+                                    idShop: idShop,
+                                    nameProduct: self.products[j].nameProduct,
+                                    priceProduct: self.products[j].priceProduct,
+                                    value: self.products[j].value,
+                                    imageUrl: self.products[j].imageUrl,
+                                });
+                            }
+
+                            var index = objectStore.index("productIndexName");
+                            self.cheaperProducts = [];
+                            self.count = 0;
+
+                            for (let i = 0; i < self.products.length; i++) {
+
+                                self.findPurchase(self.products[i], self.products[i]);
+
+
+                                /*cursors.onerror=function(evt){
+                                    
+                                    self.set('route.path',self.rootPath + 'purchase-list');
+                                }*/
+
+
+                            };
+                            self.$.saveProducts.disabled = true;
+                            self.idPurchase = null;
+                        }
+                    };
+                } else {
+
+                    var request = this.indexedDB.open("BestPriceDatabase", 1);
+                    request.onsuccess = function (evt) {
+                        db = request.result;
+                        var transaction = db.transaction("productList", 'readwrite');
+                        var objectStore = transaction.objectStore("productList");
+                        var purchase = {
+                            date: date,
+                            idShop: idShop,
+                            products: self.products,
+                            id: self.idPurchase
+                        }
+                        objectStore.put(purchase);
+
+                        self.deleteProducts();
+                        self.$.saveProducts.disabled = true;
+                    }
+                }
+            },
+
+            handleResponse: function (data) {
+                var repos = data.detail.response;
+                var i;
+                if (repos != null) {
+                    for (i = 0; i < repos.items.length; i++) {
+                        this.push('products', {
+                            // nameProduct: repos.items[i][0].toUpperCase(),
+                            // priceProduct: Math.round(repos.items[i][1] * 100) / 100,
+                            // countProduct: repos.items[i][2]
+                            nameProduct: repos.items[i][0].toUpperCase(),
+                            countProduct: repos.items[i][2],
+                            priceProduct: Math.round(repos.items[i][1] * 100) / 100,
+                            sumProduct: Number(Math.round(repos.items[i][1] * 100) / 100) * Number(repos.items[i][2]),
+                            value: null,
+                            imageUrl: "/images/product-background.png"
+                        });
+                        this.$.saveProducts.disabled = false;
+                    }
+                } else {
+                    this.toastMessage = "Сервер ФНС не доступен";
+                    this.$.toastError.open();
+                }
+            },
+            sendRequest: function () {
+                // this.data = this.$.qrData.value;
+                this.$.qrScanDialog.close();
+                if (window.navigator.onLine) {
+                    this.$.requestRepos.generateRequest();
+                } else {
+                    this.toastMessage = "Отсутствует соединение с сетью";
+                    this.$.toastError.open();
+                }
+                this.$.qrData.value = "";
+            },
+            qrDialogDismiss: function () {
+                this.$.qrData.value = "";
+                this.$.qrScanDialog.close();
+            },
+            closeToastAndOpenDialog: function () {
+                this.$.toast.toggle();
+                this.$.cheaperProductsDialog.open();
+            },
+            findPurchase: function (product, cheaperProduct) {
+                var self = this;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("product", 'readwrite');
+                    var objectStore = transaction.objectStore("product");
+                    var index = objectStore.index("productIndexName");
+
+                    var lowerDate = new Date().getTime() - 2592000000;
+                    var upperDate = new Date().getTime();
+                    var cursors = index.openCursor(IDBKeyRange.bound([lowerDate, product.nameProduct], [
+                        upperDate, product.nameProduct
+                    ]));
+
+                    cursors.onsuccess = function (event) {
+                        if (event.target.result) {
+                            if ((Number(event.target.result.value["priceProduct"]) <
+                                    Number(cheaperProduct.priceProduct)) &&
+                                (event.target.result.value["nameProduct"] === product.nameProduct)
+                            ) {
+                                let nameShop = "";
+                                let i = 0;
+                                while (self.shops[i].id !== event.target.result.value["idShop"]) i++;
+                                nameShop = self.shops[i].name;
+                                cheaperProduct = {
+                                    date: (new Date(event.target.result.value[
+                                        "date"])).toLocaleDateString(),
+                                    idShop: event.target.result.value["idShop"],
+                                    nameShop: nameShop,
+                                    nameProduct: event.target.result.value[
+                                        "nameProduct"],
+                                    priceProduct: event.target.result.value[
+                                        "priceProduct"]
+                                };
+
+                            }
+                            event.target.result['continue']();
+
+                        } else {
+                            self.count++;
+                            if (cheaperProduct !== product)
+                                self.push('cheaperProducts', cheaperProduct);
+                        }
+
+
+                        if (self.count === self.products.length && self.cheaperProducts.length !==
+                            0) {
+                            // let j;
+                            // for (j = 0; j < self.cheaperProducts.length; j++) {
+                            //     let i = 0;
+                            //     while (self.shops[i].id !== self.cheaperProducts[j].idShop) i++;
+                            //     self.cheaperProducts[j].nameShop = self.shops[i].name;
+                            // }
+                            self.$.toast.open();
+                        }
+                    };
+                }
+
+            },
+
+            getProducts: function (idPurchase) {
+                this.idPurchase = idPurchase;
+                var self = this;
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transaction = db.transaction("productList", 'readwrite');
+                    var objectStore = transaction.objectStore("productList");
+                    var index = objectStore.get(idPurchase);
+
+                    index.onsuccess = function (evt) {
+                        self.products = index.result.products;
+
+                        self.idShop = index.result.idShop;
+                        var curr_date = new Date(index.result.date);
+                        var curr_month = curr_date.getMonth() + 1;
+                        if (curr_month < 10) curr_month = "0" + curr_month;
+                        var curr_day = curr_date.getDate();
+                        if (curr_day < 10) curr_day = "0" + curr_day;
+                        var curr_year = curr_date.getFullYear();
+                        var dateStr = curr_year.toString() + "-" + curr_month.toString() +
+                            "-" +
+                            curr_day.toString();
+                        self.date = dateStr;
+                        var i = 0;
+                        while (self.shops[i].id != self.idShop) i++;
+                        self.$.shopMenu.selected = i + 1;
+
+
+                        var j;
+                        for (j = 0; j < self.products.length; j++) {
+                            var imgFile = self.products[j].value;
+                            // console.log("Got elephant!" + imgFile);
+                            var URL = window.URL || window.webkitURL;
+                            var imgURL = URL.createObjectURL(imgFile);
+                            self.products[j].imageUrl = imgURL;
+                        }
+                    };
+                };
+            },
+            deleteProducts: function () {
+                var date = new Date(this.date).getTime();
+                var self = this;
+                var db;
+                var request = this.indexedDB.open("BestPriceDatabase", 1);
+                request.onsuccess = function (evt) {
+                    db = request.result;
+                    var transactionProduct = db.transaction("product", 'readwrite');
+                    var objectStoreProduct = transactionProduct.objectStore("product");
+                    var index = objectStoreProduct.index("productIndexPurchase");
+                    var cursors = index.openCursor(IDBKeyRange.only(self.idPurchase));
+                    cursors.onsuccess = function (event) {
+                        if (event.target.result) {
+                            objectStoreProduct.delete(event.target.result.value["id"]);
+                            event.target.result['continue']();
+                        }
+
+                    };
+                    var transaction = db.transaction("product", 'readwrite');
+                    var objectStore = transaction.objectStore("product");
+                    var j;
+                    for (j = 0; j < self.products.length; j++) {
+                        objectStore.add({
+                            // date: self.date,
+                            // idPurchase: self.idPurchase,
+                            // idShop: self.idShop,
+                            // nameProduct: self.products[j].nameProduct,
+                            // priceProduct: self.products[j].priceProduct,
+                            // value: self.products[j].value
+                            date: date,
+                            idPurchase: self.idPurchase,
+                            idShop: self.idShop,
+                            nameProduct: self.products[j].nameProduct,
+                            priceProduct: self.products[j].priceProduct,
+                            value: self.products[j].value,
+                            imageUrl: self.products[j].imageUrl,
+                        });
+                    }
+                }
+                // self.idPurchase = null;
+            }
+
+        })
+    </script>
+
+</dom-module>
