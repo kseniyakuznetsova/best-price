@@ -317,7 +317,7 @@
         <paper-button class="custom save-button" id="saveProducts" on-click="save" raised>
             <iron-icon icon="save"></iron-icon>&#8195;Сохранить</paper-button>
 
-        <vaadin-date-picker language="ru" label="Дата покупки" value={{date}}>
+        <vaadin-date-picker label="Дата покупки" value={{date}}>
         </vaadin-date-picker>
 
         <paper-dropdown-menu label="Магазин">
@@ -428,7 +428,7 @@
         <paper-toast id="toastError" class="fit-bottom" text="{{toastMessage}}">
         </paper-toast>
 
-        <iron-ajax id="requestRepos" url="http://10.60.10.4:8080/api/{{qr}}" handle-as="json" on-response="handleResponse"></iron-ajax>
+        <iron-ajax id="requestRepos" url="https://192.168.43.162:8443/api/{{qr}}" handle-as="json" on-response="handleResponse"></iron-ajax>
 
     </template>
     <script>
@@ -837,10 +837,17 @@
                 if (repos != null) {
                     for (i = 0; i < repos.items.length; i++) {
                         this.push('products', {
+                            // nameProduct: repos.items[i][0].toUpperCase(),
+                            // priceProduct: Math.round(repos.items[i][1] * 100) / 100,
+                            // countProduct: repos.items[i][2]
                             nameProduct: repos.items[i][0].toUpperCase(),
+                            countProduct: repos.items[i][2],
                             priceProduct: Math.round(repos.items[i][1] * 100) / 100,
-                            countProduct: repos.items[i][2]
+                            sumProduct: Number(Math.round(repos.items[i][1] * 100) / 100) * Number(repos.items[i][2]),
+                            value: null,
+                            imageUrl: "/images/product-background.png"
                         });
+                        this.$.saveProducts.disabled = false;
                     }
                 } else {
                     this.toastMessage = "Сервер ФНС не доступен";
